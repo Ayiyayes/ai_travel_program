@@ -1,0 +1,117 @@
+<!--P6 照片生成结果页-->
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content" style="height: {{navBarHeight}}px;">
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-arrow">‹</text>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="nav-title">生成结果</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner">
+      <view class="spinner-ring"></view>
+    </view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 主内容区 -->
+  <view wx:elif="{{resultUrls.length > 0}}" class="main-content" style="top: {{totalNavHeightRpx}}rpx;">
+    <!-- 图片展示区域 -->
+    <view class="image-section">
+      <!-- 图片容器 -->
+      <view class="frame-container">
+        <!-- 单图展示 -->
+        <image
+          wx:if="{{resultUrls.length === 1}}"
+          src="{{resultUrls[0]}}"
+          mode="aspectFit"
+          class="result-image"
+          bindtap="previewImage"
+          binderror="onImageError"
+          bindload="onImageLoad"
+          data-index="0"
+        />
+
+        <!-- 多图 swiper 展示 -->
+        <swiper
+          wx:else
+          class="result-swiper"
+          current="{{currentIndex}}"
+          bindchange="onSwiperChange"
+          indicator-dots="{{false}}"
+          autoplay="{{false}}"
+          circular="{{false}}"
+        >
+          <swiper-item wx:for="{{resultUrls}}" wx:key="index">
+            <image
+              src="{{item}}"
+              mode="aspectFit"
+              class="result-image swiper-image"
+              bindtap="previewImage"
+              binderror="onImageError"
+              bindload="onImageLoad"
+              data-index="{{index}}"
+            />
+          </swiper-item>
+        </swiper>
+      </view>
+
+      <!-- 右箭头（多图时显示，末张不显示） -->
+      <view
+        wx:if="{{resultUrls.length > 1 && currentIndex < resultUrls.length - 1}}"
+        class="arrow arrow-right"
+        bindtap="nextImage"
+      >
+        <text class="arrow-icon">›</text>
+      </view>
+
+      <!-- 左箭头（首张不显示） -->
+      <view
+        wx:if="{{resultUrls.length > 1 && currentIndex > 0}}"
+        class="arrow arrow-left"
+        bindtap="prevImage"
+      >
+        <text class="arrow-icon">‹</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty-state">
+    <text class="empty-text">暂无结果</text>
+    <view class="empty-btn" bindtap="goBack">
+      <text>返回首页</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{resultUrls.length > 0}}">
+    <!-- IP头像 -->
+    <view class="action-btn" bindtap="goToIPInfo">
+      <image src="/images/ip-avatar.png" class="ip-avatar-icon" mode="aspectFit" binderror="onAvatarError"/>
+    </view>
+
+    <!-- 保存相册 -->
+    <view class="action-btn" bindtap="saveImage">
+      <image src="/images/icon-download.svg" class="btn-icon-full" mode="aspectFit"/>
+      <text class="btn-label">保存相册</text>
+    </view>
+
+    <!-- 再来一张 -->
+    <view class="action-btn" bindtap="generateAgain">
+      <image src="/images/icon-refresh.svg" class="btn-icon-full" mode="aspectFit"/>
+      <text class="btn-label">再来一张</text>
+    </view>
+
+    <!-- 分享好友 -->
+    <button class="action-btn share-btn" open-type="share">
+      <image src="/images/icon-share.svg" class="btn-icon-full" mode="aspectFit"/>
+      <text class="btn-label">分享好友</text>
+    </button>
+  </view>
+</view>

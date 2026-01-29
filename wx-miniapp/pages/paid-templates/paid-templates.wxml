@@ -1,0 +1,265 @@
+﻿<!--P8 付费模板选择页 - 老用户入口-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <!-- 返回按钮 - 跳转到我的照片 -->
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-arrow">‹</text>
+        <text class="back-text">我的照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选栏：景点 + 人群类型 - 添加动画效果 -->
+  <view class="filter-bar {{showFilters ? 'filter-bar-show' : 'filter-bar-hide'}}">
+    <!-- 景点选择器 -->
+    <view class="filter-item" bindtap="showSpotPicker">
+      <text class="filter-text">{{currentSpotName || '全部景点'}}</text>
+      <text class="arrow-down">▼</text>
+    </view>
+
+    <!-- 人群类型选择器 -->
+    <view class="filter-item" bindtap="showGroupTypePicker">
+      <text class="filter-text">{{activeGroupName || '选择类型'}}</text>
+      <text class="arrow-down">▼</text>
+    </view>
+  </view>
+
+  <!-- 模板列表 -->
+  <scroll-view
+    id="templates-scroll"
+    scroll-y
+    class="templates-scroll"
+    refresher-enabled
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscroll="handleScroll"
+    bindscrolltolower="loadMore"
+    lower-threshold="200"
+  >
+    <view wx:if="{{loading}}" class="waterfall">
+      <!-- 骨架屏 - 左列 -->
+      <view class="column">
+        <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+          <view class="skeleton-image"></view>
+        </view>
+      </view>
+      <!-- 骨架屏 - 右列 -->
+      <view class="column">
+        <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+          <view class="skeleton-image"></view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:elif="{{templates.length > 0}}">
+      <view class="waterfall">
+          <!-- ?? -->
+          <view class="column">
+            <view
+              wx:for="{{leftColumn}}"
+              wx:for-item="tpl"
+              wx:key="id"
+              class="template-item observe-item"
+              id="tpl-{{tpl.id}}"
+              data-id="{{tpl.id}}"
+              data-column="left"
+              data-index="{{index}}"
+              bindtap="previewTemplate"
+              data-url="{{tpl.imageWebpUrl || tpl.imageUrl || tpl.thumbnailWebpUrl || tpl.thumbnailUrl}}"
+            >
+              <!-- ???? - ?????? -->
+              <image
+                src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                mode="aspectFill"
+                class="template-image"
+                lazy-load="true"
+              />
+              <!-- ?????? - ??????? -->
+              <view
+                class="select-hotarea"
+                catchtap="toggleTemplateSelect"
+                data-id="{{tpl.id}}"
+              ></view>
+              <!-- ???????????? -->
+              <view
+                class="select-checkbox {{selectedTemplates.indexOf(tpl.id) > -1 ? 'selected' : ''}}"
+              >
+                <text class="checkbox-icon" wx:if="{{selectedTemplates.indexOf(tpl.id) > -1}}">✓</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- ?? -->
+          <view class="column">
+            <view
+              wx:for="{{rightColumn}}"
+              wx:for-item="tpl"
+              wx:key="id"
+              class="template-item observe-item"
+              id="tpl-{{tpl.id}}"
+              data-id="{{tpl.id}}"
+              data-column="right"
+              data-index="{{index}}"
+              bindtap="previewTemplate"
+              data-url="{{tpl.imageWebpUrl || tpl.imageUrl || tpl.thumbnailWebpUrl || tpl.thumbnailUrl}}"
+            >
+              <!-- ???? - ?????? -->
+              <image
+                src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                mode="aspectFill"
+                class="template-image"
+                lazy-load="true"
+              />
+              <!-- ?????? - ??????? -->
+              <view
+                class="select-hotarea"
+                catchtap="toggleTemplateSelect"
+                data-id="{{tpl.id}}"
+              ></view>
+              <!-- ???????????? -->
+              <view
+                class="select-checkbox {{selectedTemplates.indexOf(tpl.id) > -1 ? 'selected' : ''}}"
+              >
+                <text class="checkbox-icon" wx:if="{{selectedTemplates.indexOf(tpl.id) > -1}}">✓</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="load-more" wx:if="{{loadingMore || !hasMore}}">
+          <text wx:if="{{loadingMore}}">正在加载更多...</text>
+          <text wx:elif="{{!hasMore}}">已经到底了</text>
+        </view>
+        </view>
+
+        <view wx:else class="empty">
+          <text class="empty-text">暂无模板</text>
+        </view>
+      </scroll-view>
+
+  <!-- 景点选择弹窗（全屏两列） -->
+  <view class="fullpage-picker" wx:if="{{showSpotPickerModal}}">
+    <!-- 顶部标题栏 -->
+    <view class="fullpage-header" style="padding-top: {{statusBarHeight}}px;">
+      <view class="fullpage-back" bindtap="hideSpotPicker">
+        <text class="back-arrow">‹</text>
+        <text class="back-label">返回</text>
+      </view>
+      <text class="fullpage-title">请选择景区</text>
+      <view class="fullpage-placeholder"></view>
+    </view>
+    <!-- 两列内容 -->
+    <view class="two-column-body">
+      <!-- 左列：城市列表 -->
+      <view class="left-column">
+        <view
+          wx:for="{{cities}}"
+          wx:key="*this"
+          class="column-item {{currentCity === item ? 'active' : ''}}"
+          bindtap="selectCity"
+          data-city="{{item}}"
+          hover-class="column-item-hover"
+        >
+          <text>{{item}}</text>
+        </view>
+      </view>
+      <!-- 右列：景点列表 -->
+      <view class="right-column">
+        <view
+          wx:for="{{scenicSpots}}"
+          wx:key="value"
+          class="column-item {{currentSpot === item.value ? 'active' : ''}}"
+          bindtap="selectSpot"
+          data-spot="{{item.value}}"
+          data-name="{{item.name}}"
+          hover-class="column-item-hover"
+        >
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 人群类型选择弹窗（全屏两列） -->
+  <view class="fullpage-picker" wx:if="{{showGroupTypePickerModal}}">
+    <!-- 顶部标题栏 -->
+    <view class="fullpage-header" style="padding-top: {{statusBarHeight}}px;">
+      <view class="fullpage-back" bindtap="hideGroupTypePicker">
+        <text class="back-arrow">‹</text>
+        <text class="back-label">返回</text>
+      </view>
+      <text class="fullpage-title">请选择人群类型</text>
+      <view class="fullpage-placeholder"></view>
+    </view>
+    <!-- 顶部标签：单照/合照（仅显示分类，无切换功能） -->
+    <view class="photo-type-tabs">
+      <view class="photo-type-tab">
+        <text>单照</text>
+      </view>
+      <view class="photo-type-tab">
+        <text>合照</text>
+      </view>
+    </view>
+    <!-- 两列内容 -->
+    <view class="two-column-body">
+      <!-- 左列：单照类型 -->
+      <view class="left-column">
+        <view
+          wx:for="{{singleGroupTypes}}"
+          wx:key="code"
+          class="column-item {{activeGroupCode === item.code ? 'active' : ''}}"
+          bindtap="selectGroupTypeAndClose"
+          data-code="{{item.code}}"
+          data-name="{{item.displayName}}"
+          hover-class="column-item-hover"
+        >
+          <text>{{item.displayName}}</text>
+        </view>
+      </view>
+      <!-- 右列：合照类型 -->
+      <view class="right-column">
+        <view
+          wx:for="{{multiGroupTypes}}"
+          wx:key="code"
+          class="column-item {{activeGroupCode === item.code ? 'active' : ''}}"
+          bindtap="selectGroupTypeAndClose"
+          data-code="{{item.code}}"
+          data-name="{{item.displayName}}"
+          hover-class="column-item-hover"
+        >
+          <text>{{item.displayName}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部购物车栏 -->
+  <view class="cart-bar" wx:if="{{showCartBar}}">
+    <!-- IP头像 -->
+    <view class="ip-avatar-wrapper">
+      <image src="/images/ip-avatar.png" mode="aspectFit" class="ip-avatar-img" />
+    </view>
+
+    <!-- 购物车信息 -->
+    <view class="cart-info">
+      <view class="cart-main">
+        <text class="cart-label">到手仅支付</text>
+        <text class="cart-price">{{payAmount}}</text>
+        <text class="cart-unit">¥</text>
+      </view>
+      <view class="cart-sub">
+        <text>您共消耗积分{{totalPoints}}</text>
+        <text class="cart-deduct">已抵扣{{deductPoints}}分</text>
+      </view>
+    </view>
+
+    <!-- 支付按钮（带选中数量角标） -->
+    <view class="pay-btn-wrapper">
+      <view class="selected-count" wx:if="{{selectedTemplates.length > 0}}">{{selectedTemplates.length}}</view>
+      <button class="pay-btn" bindtap="handlePay">拍照留念</button>
+    </view>
+  </view>
+</view>
+

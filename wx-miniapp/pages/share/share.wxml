@@ -1,0 +1,55 @@
+<!--P9 分享好友详情页 - 全屏显示-->
+<view class="share-page">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 加载失败 -->
+  <view wx:elif="{{error}}" class="error-container">
+    <view class="error-icon">!</view>
+    <text class="error-text">{{errorMessage}}</text>
+    <button class="retry-btn" bindtap="goHome">返回首页</button>
+  </view>
+
+  <!-- 正常显示 -->
+  <view wx:else class="content-container">
+    <!-- 顶部导航栏 -->
+    <view class="top-bar">
+      <view class="back-btn" bindtap="goHome">
+        <text class="back-icon">&lt;</text>
+        <text class="back-text">拍更多</text>
+      </view>
+
+      <!-- 系统分享按钮区域 -->
+      <view class="share-area">
+        <button class="share-btn" open-type="share">
+          <text class="share-icon">···</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 全屏照片展示 -->
+    <view class="photo-display" bindtap="previewImage">
+      <image
+        class="photo-image"
+        src="{{displayImageUrl}}"
+        mode="aspectFill"
+      />
+
+      <!-- 小红书水印（右下角） -->
+      <view class="watermark">小红书</view>
+    </view>
+
+    <!-- 底部拍同款按钮 -->
+    <view class="bottom-action">
+      <button class="take-same-btn" bindtap="handleTakeSameStyle">
+        <view class="btn-icon">
+          <text class="camera-icon">📷</text>
+        </view>
+        <text class="btn-text">拍 同 款</text>
+      </button>
+    </view>
+  </view>
+</view>

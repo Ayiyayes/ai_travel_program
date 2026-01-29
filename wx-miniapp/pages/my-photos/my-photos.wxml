@@ -1,0 +1,113 @@
+<!--P10 我的照片页-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">我的照片</view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 用户信息头部 -->
+  <view class="header">
+    <view class="user-info">
+      <image
+        src="{{user.avatar || '/images/default-avatar.png'}}"
+        class="avatar"
+      />
+      <view class="info">
+        <text class="nickname">{{user.nickname || '游客'}}</text>
+        <text class="photo-count">共 {{total}} 张照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 照片列表 -->
+  <scroll-view
+    scroll-y
+    class="photos-scroll"
+    refresher-enabled
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+    bindscrolltolower="loadMore"
+  >
+    <!-- 加载状态 -->
+    <view wx:if="{{loading && photos.length === 0}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 照片列表 -->
+    <view wx:elif="{{photos.length > 0}}" class="photos-list">
+      <view
+        wx:for="{{photos}}"
+        wx:key="id"
+        class="photo-item"
+        bindtap="viewPhoto"
+        data-photo="{{item}}"
+      >
+        <!-- 照片预览 -->
+        <view class="photo-preview">
+          <image
+            src="{{item.resultImageUrl || item.originalImageUrl}}"
+            mode="aspectFill"
+            class="photo-image"
+          />
+          <!-- 状态标签 -->
+          <view class="status-tag status-{{item.status}}">
+            {{item.statusText}}
+          </view>
+          <!-- 处理中动画 -->
+          <view wx:if="{{item.status === 'processing'}}" class="processing-mask">
+            <view class="processing-spinner"></view>
+          </view>
+        </view>
+
+        <!-- 照片信息 -->
+        <view class="photo-info">
+          <text class="photo-date">{{item.createdAt}}</text>
+          <view class="photo-actions">
+            <!-- 已完成的照片显示保存按钮 -->
+            <view
+              wx:if="{{item.status === 'completed'}}"
+              class="action-btn"
+              catchtap="savePhoto"
+              data-photo="{{item}}"
+            >
+              <image class="action-icon" src="/images/icon-download.png" mode="aspectFit" />
+            </view>
+            <!-- 长按显示预览 -->
+            <view
+              class="action-btn"
+              catchtap="previewPhoto"
+              data-photo="{{item}}"
+            >
+              <image class="action-icon" src="/images/icon-preview.png" mode="aspectFit" />
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty">
+      <image class="empty-icon" src="/images/icon-empty-photos.png" mode="aspectFit" />
+      <text class="empty-text">还没有生成照片</text>
+      <text class="empty-hint">快去选择模板生成您的专属旅拍照片吧</text>
+      <button class="btn-start" bindtap="goToHome">
+        去生成
+      </button>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{hasMore && photos.length > 0 && !loading}}" class="load-more">
+      <text>下拉加载更多...</text>
+    </view>
+    <view wx:if="{{loading && photos.length > 0}}" class="load-more">
+      <text>加载中...</text>
+    </view>
+    <view wx:if="{{!hasMore && photos.length > 0}}" class="load-more no-more">
+      <text>没有更多了</text>
+    </view>
+  </scroll-view>
+</view>

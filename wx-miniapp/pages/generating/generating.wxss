@@ -1,0 +1,195 @@
+/* P5 生成等待页样式 */
+
+/* ========== 容器 ========== */
+.container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #FDF9F6;
+  overflow: hidden;
+}
+
+/* ========== 背景层 ========== */
+.bg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.bg-image {
+  position: absolute;
+  width: 144%;
+  height: 100%;
+  left: -22%;
+  top: 0;
+  filter: blur(20rpx);
+}
+
+.bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ========== 顶部倒计时胶囊 ========== */
+.countdown-capsule {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding-top: 108rpx;
+}
+
+.countdown-pill {
+  background: rgba(234, 227, 224, 0.8);
+  border-radius: 50rpx;
+  padding: 12rpx 32rpx;
+}
+
+.countdown-text {
+  font-family: 'Arimo', 'Inter', sans-serif;
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #6F5D55;
+  line-height: 48rpx;
+}
+
+/* ========== 中间加载区域 ========== */
+.loading-section {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 94rpx;
+  height: 94rpx;
+  margin-bottom: 24rpx;
+}
+
+.spinner-ring {
+  width: 100%;
+  height: 100%;
+  border: 6rpx solid rgba(61, 61, 61, 0.2);
+  border-top-color: #3D3D3D;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 40rpx;
+  font-weight: 400;
+  color: #EAE3E0;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* 重试按钮 */
+.retry-btn {
+  width: 160rpx;
+  height: 80rpx;
+  background: rgba(232, 154, 141, 0.9);
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.retry-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+
+/* ========== 底部IP气泡区域 ========== */
+.bottom-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 40rpx;
+}
+
+/* 气泡框 */
+.bubble-box {
+  position: relative;
+  max-width: 548rpx;
+  margin-bottom: 0;
+}
+
+.bubble-content {
+  background: rgba(253, 249, 246, 0.9);
+  border: 2rpx solid #6F5D55;
+  border-radius: 16rpx;
+  padding: 24rpx 32rpx;
+}
+
+.bubble-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 30rpx;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #5D4E44;
+}
+
+/* 气泡箭头 */
+.bubble-arrow {
+  position: absolute;
+  bottom: -20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 20rpx solid transparent;
+  border-right: 20rpx solid transparent;
+  border-top: 24rpx solid rgba(253, 249, 246, 0.9);
+}
+
+.bubble-arrow::before {
+  content: '';
+  position: absolute;
+  top: -26rpx;
+  left: -22rpx;
+  width: 0;
+  height: 0;
+  border-left: 22rpx solid transparent;
+  border-right: 22rpx solid transparent;
+  border-top: 26rpx solid #6F5D55;
+  z-index: -1;
+}
+
+/* IP头像 */
+.ip-avatar {
+  width: 206rpx;
+  height: 206rpx;
+  margin-top: -10rpx;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+}

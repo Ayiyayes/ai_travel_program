@@ -1,0 +1,37 @@
+﻿<!--模板详情页 - 全屏显示-->
+<view class="container" bindtap="goBack">
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:elif="{{template}}" class="content">
+    <!-- 全屏模板图片 -->
+    <image
+      src="{{template.imageWebpUrl || template.imageUrl || template.thumbnailWebpUrl || template.thumbnailUrl}}"
+      mode="aspectFill"
+      class="fullscreen-image"
+      binderror="onImageError"
+    />
+
+    <!-- 返回按钮 -->
+    <view class="back-btn" catchtap="goBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+
+    <!-- 拍照按钮 -->
+    <view class="photo-btn-wrapper" catchtap="startPhoto">
+      <view class="photo-btn">
+        <view class="camera-icon">
+          <view class="camera-body"></view>
+          <view class="camera-lens"></view>
+          <view class="camera-flash"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty">
+    <text class="empty-text">{{errorMessage || '模板不存在'}}</text>
+  </view>
+</view>

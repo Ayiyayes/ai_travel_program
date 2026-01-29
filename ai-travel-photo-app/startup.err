@@ -1,0 +1,163 @@
+(node:22916) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[31mWebSocket server error: Port 24678 is already in use[39m
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Coze] analyzeUserFace error: Insufficient coze credits balance, please wait for the quota refresh or upgrade to paid version.
+[Auth] Missing session cookie
+[Coze] Workflow call error: The monthly cumulative number of calls of plugin has reached the plan limit. If you need to continue making calls, please upgrade your plan.
+[photo.createSinglePublic] 换脸失败: Error: Coze workflow call failed: The monthly cumulative number of calls of plugin has reached the plan limit. If you need to continue making calls, please upgrade your plan.
+    at callCozeWorkflowSync (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\server\coze.ts:194:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\server\routers.ts:811:45)
+    at async resolveMiddleware (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:571:22)
+    at async callRecursive (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:633:20)
+    at async callRecursive (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:633:20)
+    at async procedure (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:673:20)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\http\resolveResponse.ts:347:31)
+    at async resolveResponse (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\http\resolveResponse.ts:375:31)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\adapters\node-http\nodeHTTPRequestHandler.ts:100:26)
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Coze] analyzeUserFace error: Insufficient coze credits balance, please wait for the quota refresh or upgrade to paid version.
+[Auth] Missing session cookie
+[Coze] Workflow call error: Insufficient coze credits balance, please wait for the quota refresh or upgrade to paid version.
+[photo.createSinglePublic] 换脸失败: Error: Coze workflow call failed: Insufficient coze credits balance, please wait for the quota refresh or upgrade to paid version.
+    at callCozeWorkflowSync (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\server\coze.ts:194:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\server\routers.ts:811:45)
+    at async resolveMiddleware (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:571:22)
+    at async callRecursive (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:633:20)
+    at async callRecursive (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:633:20)
+    at async procedure (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\procedureBuilder.ts:673:20)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\http\resolveResponse.ts:347:31)
+    at async resolveResponse (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\unstable-core-do-not-import\http\resolveResponse.ts:375:31)
+    at async <anonymous> (F:\AI拍照玩偶素材内容\软件开发代码\ai_travel_code_20260112\ai-travel-photo-app\node_modules\.pnpm\@trpc+server@11.6.0_typescript@5.9.3\node_modules\@trpc\server\src\adapters\node-http\nodeHTTPRequestHandler.ts:100:26)
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie
+[Auth] Missing session cookie

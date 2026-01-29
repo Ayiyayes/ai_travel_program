@@ -1,0 +1,63 @@
+<!--P5 生成等待页-->
+<view class="container">
+  <!-- 背景层：虚化模板图片 -->
+  <view class="bg-layer">
+    <image
+      wx:if="{{carouselTemplates.length > 0}}"
+      src="{{carouselTemplates[currentTemplateIndex].imageUrl}}"
+      mode="aspectFill"
+      class="bg-image"
+    />
+    <image
+      wx:elif="{{template && template.imageUrl}}"
+      src="{{template.imageUrl}}"
+      mode="aspectFill"
+      class="bg-image"
+    />
+    <view class="bg-overlay"></view>
+  </view>
+
+  <!-- 顶部倒计时胶囊 -->
+  <view class="countdown-capsule">
+    <view class="countdown-pill">
+      <text class="countdown-text">还剩{{countdown}}秒</text>
+    </view>
+  </view>
+
+  <!-- 中间加载区域 -->
+  <view class="loading-section">
+    <!-- 加载动画 -->
+    <view class="loading-spinner" wx:if="{{!showRetry}}">
+      <view class="spinner-ring"></view>
+    </view>
+    <!-- 状态文字 -->
+    <text class="status-text">{{progressText}}</text>
+  </view>
+
+  <!-- 底部IP气泡区域 -->
+  <view class="bottom-section">
+    <!-- 气泡对话框 -->
+    <view class="bubble-box">
+      <view class="bubble-content">
+        <text class="bubble-text">{{ipMessage}}</text>
+      </view>
+      <view class="bubble-arrow"></view>
+    </view>
+    <!-- IP头像 -->
+    <view class="ip-avatar">
+      <image
+        wx:if="{{!showAvatarFallback}}"
+        src="/images/ip-avatar.png"
+        mode="aspectFill"
+        class="avatar-img"
+        binderror="onAvatarError"
+      />
+      <image
+        wx:if="{{showAvatarFallback}}"
+        src="/images/ip-avatar-fallback.png"
+        mode="aspectFill"
+        class="avatar-img"
+      />
+    </view>
+  </view>
+</view>

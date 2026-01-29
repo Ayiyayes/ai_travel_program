@@ -1,0 +1,138 @@
+<!--首页 - 模板列表-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="navbar-placeholder"></view>
+      <view class="navbar-title">选择你的梦想瞬间</view>
+      <view class="my-photos-btn" bindtap="goToMyPhotos">
+        <text class="my-photos-text">我的照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 人群类型标签 -->
+  <scroll-view
+    scroll-x
+    class="tabs-wrapper"
+    scroll-into-view="tab-{{activeGroupCode}}"
+    scroll-with-animation
+   style="height: 86rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx">
+    <view class="tabs">
+      <view
+        wx:for="{{groupTypes}}"
+        wx:key="code"
+        id="tab-{{item.code}}"
+        class="tab-item {{activeGroupCode === item.code ? 'active' : ''}}"
+        bindtap="switchGroupType"
+        data-code="{{item.code}}"
+        data-index="{{index}}"
+      >
+        <text class="tab-text">{{item.displayName}}</text>
+        <view wx:if="{{activeGroupCode === item.code}}" class="tab-indicator" style="height: 10rpx; display: block; box-sizing: border-box; left: 0rpx; top: 54rpx"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 模板列表 swiper -->
+  <swiper
+    wx:if="{{groupTypes.length > 0}}"
+    class="templates-swiper"
+    current="{{currentIndex}}"
+    bindchange="onSwiperChange"
+    duration="300"
+  >
+    <swiper-item wx:for="{{groupTypes}}" wx:key="code">
+      <scroll-view
+        id="templates-scroll-{{item.code}}"
+        scroll-y
+        class="templates-scroll"
+        refresher-enabled
+        refresher-triggered="{{refreshing}}"
+        bindrefresherrefresh="onRefresh"
+        bindscrolltolower="loadMore"
+        lower-threshold="200"
+      >
+        <view wx:if="{{loading && activeGroupCode === item.code}}" class="waterfall">
+          <!-- 骨架屏 - 左列 -->
+          <view class="column">
+            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+              <view class="skeleton-image"></view>
+            </view>
+          </view>
+          <!-- 骨架屏 - 右列 -->
+          <view class="column">
+            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+              <view class="skeleton-image"></view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:elif="{{activeGroupCode === item.code && templates.length > 0}}">
+          <view class="waterfall">
+            <!-- 左列 -->
+            <view class="column">
+              <view
+                wx:for="{{leftColumn}}"
+                wx:for-item="tpl"
+                wx:key="id"
+                class="template-item observe-item"
+                id="tpl-{{tpl.id}}"
+                data-id="{{tpl.id}}"
+                data-column="left"
+                data-index="{{index}}"
+                bindtap="goToDetail"
+              >
+                <image
+                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                  mode="aspectFill"
+                  class="template-image"
+                  lazy-load="true"
+                />
+              </view>
+            </view>
+
+            <!-- 右列 -->
+            <view class="column">
+              <view
+                wx:for="{{rightColumn}}"
+                wx:for-item="tpl"
+                wx:key="id"
+                class="template-item observe-item"
+                id="tpl-{{tpl.id}}"
+                data-id="{{tpl.id}}"
+                data-column="right"
+                data-index="{{index}}"
+                bindtap="goToDetail"
+              >
+                <image
+                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                  mode="aspectFill"
+                  class="template-image"
+                  lazy-load="true"
+                />
+              </view>
+            </view>
+          </view>
+
+          <view class="load-more" wx:if="{{loadingMore || !hasMore}}">
+            <text wx:if="{{loadingMore}}">正在加载更多...</text>
+            <text wx:elif="{{!hasMore}}">已经到底了</text>
+          </view>
+        </view>
+
+        <view wx:elif="{{activeGroupCode === item.code}}" class="empty">
+          <text class="empty-text">暂无模板</text>
+        </view>
+      </scroll-view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 无数据时的提示 -->
+  <view wx:if="{{groupTypes.length === 0 && !loading}}" class="empty-state">
+    <text class="empty-text">无法加载数据，请检查网络连接</text>
+    <view class="retry-btn" bindtap="loadGroupTypes">
+      <text>点击重试</text>
+    </view>
+  </view>
+</view>

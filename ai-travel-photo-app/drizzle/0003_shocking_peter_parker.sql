@@ -1,0 +1,1 @@
+ALTER TABLE `templates` ADD `isNational` boolean DEFAULT false NOT NULL;

@@ -1,0 +1,23 @@
+<!--P0 欢迎页 - 路由判断页-->
+<view class="container">
+  <!-- IP形象展示 -->
+  <view class="welcome-content">
+    <image
+      wx:if="{{ipImageUrl}}"
+      class="ip-image"
+      src="{{ipImageUrl}}"
+      mode="aspectFit"
+    />
+    <view wx:else class="ip-placeholder">
+      <view class="ip-icon">AI</view>
+      <view class="ip-text">旅拍</view>
+    </view>
+
+    <!-- 加载提示 -->
+    <view class="loading-tips">
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+    </view>
+  </view>
+</view>

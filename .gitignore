@@ -1,0 +1,29 @@
+# IDEs and Editors
+.vscode/
+.idea/
+.trae/
+.codex/
+.claude/
+*.swp
+*.swo
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+nul
+
+# Project Specific
+# Exclude local tools and databases
+ai-travel-photo-app/.tools/
+ai-travel-photo-app/.manus/
+
+# WeChat Mini Program private config
+wx-miniapp/project.private.config.json

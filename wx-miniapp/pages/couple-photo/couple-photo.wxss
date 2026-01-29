@@ -1,0 +1,373 @@
+/* P11 双人合照页样式 */
+.container {
+  min-height: 100vh;
+  background-color: #fdf9f6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 自定义导航栏 ========== */
+.custom-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 20rpx;
+  background-color: #fdf9f6;
+}
+
+.navbar-back {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: #333;
+}
+
+.navbar-title {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.navbar-placeholder {
+  width: 80rpx;
+}
+
+/* ========== 内容区域 ========== */
+.content {
+  flex: 1;
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 模板预览 */
+.template-preview {
+  width: 100%;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 32rpx;
+}
+
+.template-image {
+  width: 100%;
+  height: 400rpx;
+}
+
+.template-name {
+  display: block;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  text-align: center;
+}
+
+/* ========== 步骤指示器 ========== */
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  padding: 0 20rpx;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.step-number {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step.active .step-number {
+  background: linear-gradient(135deg, #e89a8d 0%, #d4956b 100%);
+  color: #fff;
+}
+
+.step.completed .step-number {
+  background: #52c41a;
+  color: #fff;
+}
+
+.step-text {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.step.active .step-text,
+.step.completed .step-text {
+  color: #333;
+}
+
+.step-line {
+  width: 60rpx;
+  height: 2rpx;
+  background: #e0e0e0;
+  margin: 0 16rpx;
+  margin-bottom: 30rpx;
+}
+
+/* ========== 自拍区域 ========== */
+.selfie-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.selfie-wrapper {
+  width: 100%;
+  height: 400rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  margin-bottom: 24rpx;
+}
+
+.selfie-image {
+  width: 100%;
+  height: 100%;
+}
+
+.selfie-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+.camera-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 16rpx;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 提示 */
+.tips {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.tips-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.tips-item {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+/* ========== 邀请创建成功 ========== */
+.invitation-created {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+}
+
+.success-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.icon-text {
+  font-size: 60rpx;
+  color: #fff;
+}
+
+.success-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.success-desc {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding: 0 20rpx;
+}
+
+.invitation-code-box {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx 48rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.code-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.code-value {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #e89a8d;
+  letter-spacing: 8rpx;
+}
+
+.share-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.invite-hint {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 24rpx;
+}
+
+/* ========== 邀请者信息 ========== */
+.inviter-info {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.inviter-text {
+  font-size: 32rpx;
+  color: #e89a8d;
+  font-weight: 500;
+}
+
+/* ========== 按钮 ========== */
+.btn-primary {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #e89a8d 0%, #d4956b 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.btn-primary[disabled] {
+  background: #ccc;
+  color: #fff;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-secondary {
+  width: 100%;
+  height: 96rpx;
+  background: #fff;
+  color: #e89a8d;
+  font-size: 32rpx;
+  border: 2rpx solid #e89a8d;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary::after {
+  border: none;
+}
+
+/* ========== 加载 ========== */
+.loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+/* ========== 生成中遮罩 ========== */
+.generating-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.generating-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.generating-spinner {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.generating-text {
+  font-size: 32rpx;
+  color: #fff;
+}

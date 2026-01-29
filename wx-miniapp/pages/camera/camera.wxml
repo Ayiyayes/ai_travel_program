@@ -1,0 +1,83 @@
+<!--P3 拍照页面 - 集成脸型分析-->
+<view class="container">
+  <!-- 相机预览 -->
+  <camera
+    wx:if="{{!photoTaken}}"
+    device-position="front"
+    flash="off"
+    class="camera"
+    binderror="onCameraError"
+  ></camera>
+
+  <!-- 拍照后的预览图 -->
+  <image
+    wx:if="{{photoTaken}}"
+    src="{{tempPhotoPath}}"
+    mode="aspectFill"
+    class="preview-image"
+  />
+
+  <!-- 取景框遮罩层 -->
+  <view class="overlay">
+    <!-- 上方黑色遮罩 -->
+    <view class="mask-top"></view>
+
+    <!-- 中间区域（取景框） -->
+    <view class="frame-area">
+      <view class="mask-left"></view>
+      <view class="frame-box">
+        <!-- 四个角的边框 -->
+        <view class="corner corner-tl"></view>
+        <view class="corner corner-tr"></view>
+        <view class="corner corner-bl"></view>
+        <view class="corner corner-br"></view>
+      </view>
+      <view class="mask-right"></view>
+    </view>
+
+    <!-- 下方黑色遮罩 -->
+    <view class="mask-bottom"></view>
+  </view>
+
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="navbar-title">拍照</text>
+      <view class="navbar-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 底部提示框 -->
+  <view class="tip-box" wx:if="{{!photoTaken && !analyzing}}">
+    <text class="tip-text">拍照的时候注意确保面部没有口罩、眼镜、帽子等遮挡物；脸要正对镜头，眼镜看向摄像头。</text>
+  </view>
+
+  <!-- 拍照按钮 -->
+  <view class="capture-btn-wrapper" wx:if="{{!photoTaken}}">
+    <view class="capture-btn" bindtap="takePhoto">
+      <view class="capture-btn-inner"></view>
+    </view>
+  </view>
+
+  <!-- 脸型分析中的遮罩 -->
+  <view class="analyzing-overlay" wx:if="{{analyzing}}">
+    <view class="analyzing-content">
+      <view class="analyzing-spinner"></view>
+      <text class="analyzing-text">{{analyzeStatus}}</text>
+    </view>
+  </view>
+
+  <!-- 拍照后的操作按钮 -->
+  <view class="action-buttons" wx:if="{{photoTaken && !analyzing}}">
+    <view class="btn-retake" bindtap="retakePhoto">
+      <text class="btn-text">重 拍</text>
+    </view>
+    <view class="btn-confirm" bindtap="confirmPhoto">
+      <text class="btn-text">确 认</text>
+    </view>
+  </view>
+</view>

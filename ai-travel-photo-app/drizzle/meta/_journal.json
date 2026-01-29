@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1768135919823,
+      "tag": "0000_living_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1768136139153,
+      "tag": "0001_stiff_post",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768172556418,
+      "tag": "0002_petite_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1768387524065,
+      "tag": "0003_shocking_peter_parker",
+      "breakpoints": true
+    }
+  ]
+}

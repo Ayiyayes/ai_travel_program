@@ -1,0 +1,111 @@
+/* pages/template-detail/template-detail.wxss */
+.container {
+  width: 100%;
+  height: 100vh;
+  background-color: #1c1c1c;
+  position: relative;
+}
+
+.loading,
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #ffffff;
+}
+
+.content {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+/* 全屏图片 */
+.fullscreen-image {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* 返回按钮 */
+.back-btn {
+  position: absolute;
+  left: 24rpx;
+  top: 120rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  z-index: 10;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: #000000;
+  font-weight: 300;
+}
+
+.back-text {
+  font-size: 32rpx;
+  color: #000000;
+}
+
+/* 拍照按钮 */
+.photo-btn-wrapper {
+  position: absolute;
+  left: 50%;
+  bottom: 100rpx;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.photo-btn {
+  width: 288rpx;
+  height: 180rpx;
+  background-color: #e89a8d;
+  border: 6rpx solid #fdf9f6;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 相机图标 */
+.camera-icon {
+  width: 140rpx;
+  height: 140rpx;
+  position: relative;
+}
+
+.camera-body {
+  position: absolute;
+  left: 12rpx;
+  right: 12rpx;
+  top: 30rpx;
+  bottom: 30rpx;
+  border: 6rpx solid #fdf9f6;
+  border-radius: 16rpx;
+}
+
+.camera-lens {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56rpx;
+  height: 56rpx;
+  border: 6rpx solid #fdf9f6;
+  border-radius: 50%;
+}
+
+.camera-flash {
+  position: absolute;
+  right: 24rpx;
+  top: 40rpx;
+  width: 16rpx;
+  height: 16rpx;
+  background-color: #fdf9f6;
+  border-radius: 4rpx;
+}

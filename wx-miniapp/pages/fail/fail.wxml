@@ -1,0 +1,59 @@
+<!--P7 生成失败页-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-back" bindtap="goBack">
+      <image class="back-icon" src="/images/icon-back.png" mode="aspectFit" />
+    </view>
+    <view class="navbar-title">生成失败</view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 失败内容 -->
+  <view class="content">
+    <!-- 失败图标 -->
+    <view class="fail-icon-wrapper">
+      <image class="fail-icon" src="/images/icon-fail.png" mode="aspectFit" />
+    </view>
+
+    <!-- 失败提示文字 -->
+    <view class="fail-message">
+      <text class="fail-title">哎呀，生成失败了</text>
+      <text class="fail-desc">{{errorMessage || '照片生成遇到问题，请重新尝试'}}</text>
+    </view>
+
+    <!-- 原因说明（如果有） -->
+    <view class="fail-reason" wx:if="{{errorCode}}">
+      <text class="reason-label">错误代码：</text>
+      <text class="reason-value">{{errorCode}}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <!-- 重新尝试 -->
+      <button class="btn-retry" bindtap="retryGeneration">
+        重新生成
+      </button>
+
+      <!-- 更换模板 -->
+      <button class="btn-change" bindtap="changeTemplate">
+        更换模板
+      </button>
+
+      <!-- 联系客服 -->
+      <button class="btn-contact" open-type="contact">
+        联系客服
+      </button>
+    </view>
+
+    <!-- 温馨提示 -->
+    <view class="tips">
+      <text class="tips-title">温馨提示</text>
+      <view class="tips-list">
+        <text class="tips-item">• 请确保照片清晰、正面、光线充足</text>
+        <text class="tips-item">• 避免遮挡面部或佩戴墨镜</text>
+        <text class="tips-item">• 如多次失败，请尝试更换照片</text>
+      </view>
+    </view>
+  </view>
+</view>

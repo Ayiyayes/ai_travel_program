@@ -1,0 +1,67 @@
+<!--P4 权限提醒页 - 支持摄像头/位置/相册三种权限-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">{{config.title}}</view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 如果有配置图片则显示图片 -->
+  <view wx:if="{{permissionImageUrl}}" class="image-container" bindtap="requestPermission">
+    <image
+      src="{{permissionImageUrl}}"
+      mode="aspectFill"
+      class="permission-image"
+    />
+  </view>
+
+  <!-- 默认权限引导界面 -->
+  <view wx:else class="default-content">
+    <view class="icon-wrapper">
+      <!-- 根据权限类型显示不同图标 -->
+      <view wx:if="{{permissionType === 'camera'}}" class="icon-camera">📷</view>
+      <view wx:elif="{{permissionType === 'location'}}" class="icon-location">📍</view>
+      <view wx:elif="{{permissionType === 'album'}}" class="icon-album">🖼️</view>
+    </view>
+
+    <view class="text-content">
+      <text class="title">{{config.modalTitle}}</text>
+      <text class="desc">{{config.defaultMessage}}</text>
+    </view>
+
+    <!-- 相机权限的拍照小贴士 -->
+    <view wx:if="{{permissionType === 'camera'}}" class="tips-box">
+      <text class="tips-title">拍照小贴士：</text>
+      <text class="tips-item">• 确保光线充足，面部清晰</text>
+      <text class="tips-item">• 正面直视镜头，保持自然表情</text>
+      <text class="tips-item">• 避免佩戴墨镜、口罩等遮挡物</text>
+    </view>
+
+    <!-- 位置权限的说明 -->
+    <view wx:elif="{{permissionType === 'location'}}" class="tips-box">
+      <text class="tips-title">位置服务说明：</text>
+      <text class="tips-item">• 自动推荐您附近的景点模板</text>
+      <text class="tips-item">• 展示距离最近的热门拍照地</text>
+      <text class="tips-item">• 您的位置信息仅用于模板推荐</text>
+    </view>
+
+    <!-- 相册权限的说明 -->
+    <view wx:elif="{{permissionType === 'album'}}" class="tips-box">
+      <text class="tips-title">相册权限说明：</text>
+      <text class="tips-item">• 保存精美照片到手机相册</text>
+      <text class="tips-item">• 方便您分享到社交平台</text>
+      <text class="tips-item">• 随时查看和管理您的作品</text>
+    </view>
+
+    <button class="btn-authorize" bindtap="requestPermission">
+      {{config.buttonText}}
+    </button>
+
+    <button class="btn-skip" bindtap="goBack">
+      暂不使用
+    </button>
+  </view>
+</view>

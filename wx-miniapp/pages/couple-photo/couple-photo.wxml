@@ -1,0 +1,143 @@
+<!--P11 双人合照页-->
+<view class="container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">双人合照</view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 创建邀请模式 -->
+  <view wx:if="{{mode === 'create'}}" class="content">
+    <!-- 模板预览 -->
+    <view class="template-preview" wx:if="{{template}}">
+      <image class="template-image" src="{{template.imageUrl}}" mode="aspectFit" />
+      <text class="template-name">{{template.name}}</text>
+    </view>
+
+    <!-- 步骤提示 -->
+    <view class="steps">
+      <view class="step {{selfieUrl ? 'completed' : 'active'}}">
+        <view class="step-number">1</view>
+        <text class="step-text">上传您的自拍</text>
+      </view>
+      <view class="step-line"></view>
+      <view class="step {{createdInvitationCode ? 'completed' : (selfieUrl ? 'active' : '')}}">
+        <view class="step-number">2</view>
+        <text class="step-text">邀请好友</text>
+      </view>
+      <view class="step-line"></view>
+      <view class="step">
+        <view class="step-number">3</view>
+        <text class="step-text">生成合照</text>
+      </view>
+    </view>
+
+    <!-- 未创建邀请时显示 -->
+    <view wx:if="{{!createdInvitationCode}}" class="selfie-section">
+      <!-- 自拍预览 -->
+      <view class="selfie-wrapper" bindtap="chooseSelfie">
+        <image wx:if="{{selfieUrl}}" class="selfie-image" src="{{selfieUrl}}" mode="aspectFill" />
+        <view wx:else class="selfie-placeholder">
+          <image class="camera-icon" src="/images/icon-camera-large.png" mode="aspectFit" />
+          <text class="placeholder-text">点击拍摄或选择照片</text>
+        </view>
+      </view>
+
+      <view class="tips">
+        <text class="tips-title">拍照提示：</text>
+        <text class="tips-item">- 请正面直视镜头</text>
+        <text class="tips-item">- 确保光线充足，面部清晰</text>
+        <text class="tips-item">- 避免遮挡面部</text>
+      </view>
+
+      <button
+        class="btn-primary"
+        bindtap="createInvitation"
+        disabled="{{!selfieUrl || isCreating}}"
+      >
+        {{isCreating ? '创建中...' : '创建邀请'}}
+      </button>
+    </view>
+
+    <!-- 已创建邀请显示 -->
+    <view wx:else class="invitation-created">
+      <view class="success-icon">
+        <text class="icon-text">✓</text>
+      </view>
+      <text class="success-title">邀请创建成功！</text>
+      <text class="success-desc">将邀请分享给好友，好友上传照片后即可生成合照</text>
+
+      <view class="invitation-code-box">
+        <text class="code-label">邀请码</text>
+        <text class="code-value">{{createdInvitationCode}}</text>
+      </view>
+
+      <view class="share-buttons">
+        <button class="btn-primary" open-type="share">
+          分享给好友
+        </button>
+        <button class="btn-secondary" bindtap="copyInvitationLink">
+          复制邀请码
+        </button>
+      </view>
+
+      <text class="invite-hint">邀请24小时内有效</text>
+    </view>
+  </view>
+
+  <!-- 接受邀请模式 -->
+  <view wx:elif="{{mode === 'accept'}}" class="content">
+    <!-- 邀请信息 -->
+    <view wx:if="{{invitation && inviterTemplate}}" class="invitation-info">
+      <view class="template-preview">
+        <image class="template-image" src="{{inviterTemplate.imageUrl}}" mode="aspectFit" />
+        <text class="template-name">{{inviterTemplate.name}}</text>
+      </view>
+
+      <view class="inviter-info">
+        <text class="inviter-text">好友邀请你一起拍合照</text>
+      </view>
+
+      <!-- 自拍区域 -->
+      <view class="selfie-section">
+        <view class="selfie-wrapper" bindtap="chooseSelfie">
+          <image wx:if="{{partnerSelfieUrl}}" class="selfie-image" src="{{partnerSelfieUrl}}" mode="aspectFill" />
+          <view wx:else class="selfie-placeholder">
+            <image class="camera-icon" src="/images/icon-camera-large.png" mode="aspectFit" />
+            <text class="placeholder-text">点击上传您的照片</text>
+          </view>
+        </view>
+
+        <view class="tips">
+          <text class="tips-title">拍照提示：</text>
+          <text class="tips-item">- 请正面直视镜头</text>
+          <text class="tips-item">- 确保光线充足，面部清晰</text>
+        </view>
+
+        <button
+          class="btn-primary"
+          bindtap="acceptInvitation"
+          disabled="{{!partnerSelfieUrl || isAccepting}}"
+        >
+          {{isAccepting ? '生成中...' : '生成合照'}}
+        </button>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:else class="loading">
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <!-- 生成中遮罩 -->
+  <view wx:if="{{generating}}" class="generating-mask">
+    <view class="generating-content">
+      <view class="generating-spinner"></view>
+      <text class="generating-text">{{generatingText}}</text>
+    </view>
+  </view>
+</view>

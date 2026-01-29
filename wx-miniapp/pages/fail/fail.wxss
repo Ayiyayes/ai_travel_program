@@ -1,0 +1,193 @@
+/* P7 生成失败页样式 */
+.container {
+  min-height: 100vh;
+  background-color: #fdf9f6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 自定义导航栏 ========== */
+.custom-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 20rpx;
+  background-color: #fdf9f6;
+}
+
+.navbar-back {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.navbar-title {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.navbar-placeholder {
+  width: 80rpx;
+}
+
+/* ========== 内容区域 ========== */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+}
+
+/* 失败图标 */
+.fail-icon-wrapper {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 40rpx;
+}
+
+.fail-icon {
+  width: 100%;
+  height: 100%;
+}
+
+/* 失败提示文字 */
+.fail-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.fail-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.fail-desc {
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+}
+
+/* 错误代码 */
+.fail-reason {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  margin-bottom: 60rpx;
+}
+
+.reason-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.reason-value {
+  font-size: 24rpx;
+  color: #666;
+  font-family: monospace;
+}
+
+/* ========== 操作按钮 ========== */
+.action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-bottom: 60rpx;
+}
+
+.btn-retry {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #e89a8d 0%, #d4956b 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.btn-retry::after {
+  border: none;
+}
+
+.btn-change {
+  width: 100%;
+  height: 96rpx;
+  background: #fff;
+  color: #e89a8d;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 48rpx;
+  border: 2rpx solid #e89a8d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-change::after {
+  border: none;
+}
+
+.btn-contact {
+  width: 100%;
+  height: 96rpx;
+  background: #fff;
+  color: #666;
+  font-size: 32rpx;
+  border-radius: 48rpx;
+  border: 2rpx solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-contact::after {
+  border: none;
+}
+
+/* ========== 温馨提示 ========== */
+.tips {
+  width: 100%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.tips-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.tips-item {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.6;
+}
