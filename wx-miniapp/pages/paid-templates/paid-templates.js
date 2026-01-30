@@ -1,1062 +1,2149 @@
-// P8 ¸¶·ÑÄ£°åÑ¡ÔñÒ³ - ÀÏÓÃ»§Èë¿Ú
+// P8 ä»˜è´¹æ¨¡æ¿é€‰æ‹©é¡µ - è€ç”¨æˆ·å…¥å£
+
 const { templateApi } = require('../../utils/api.js')
+
 const { request } = require('../../utils/request.js')
 
+
+
 const TEMPLATE_VERSION_KEY = 'templateVersion'
+
 const TEMPLATE_CACHE_PREFIX = 'templateCache:p8:'
 
-// ¹ö¶¯¿ØÖÆ³£Á¿
-const TEMPLATE_HEIGHT = 250 // Ä£°å¸ß¶ÈãĞÖµ£¨px£©
-const SCROLL_THRESHOLD = 30 // ¹ö¶¯·½ÏòÅĞ¶ÏãĞÖµ
+
+
+// æ»šåŠ¨æ§åˆ¶å¸¸é‡
+
+const TEMPLATE_HEIGHT = 250 // æ¨¡æ¿é«˜åº¦é˜ˆå€¼ï¼ˆpxï¼‰
+
+const SCROLL_THRESHOLD = 30 // æ»šåŠ¨æ–¹å‘åˆ¤æ–­é˜ˆå€¼
+
+
 
 Page({
+
   data: {
+
     statusBarHeight: 20,
-    points: 0, // ÓÃ»§»ı·Ö
-    currentCity: '', // µ±Ç°Ñ¡ÔñµÄ³ÇÊĞ
-    cities: [], // ³ÇÊĞÁĞ±í
-    currentSpot: '', // µ±Ç°Ñ¡ÔñµÄ¾°µã
-    currentSpotName: 'È«²¿¾°µã', // µ±Ç°Ñ¡ÔñµÄ¾°µãÃû³Æ£¨ÓÃÓÚÏÔÊ¾£©
-    scenicSpots: [], // ¾°µãÁĞ±í
+    navTop: 0,
+    navHeight: 44,
+    navBarHeight: 88,
+
+    points: 0, // ç”¨æˆ·ç§¯åˆ†
+
+    currentCity: '', // å½“å‰é€‰æ‹©çš„åŸå¸‚
+
+    cities: [], // åŸå¸‚åˆ—è¡¨
+
+    currentSpot: '', // å½“å‰é€‰æ‹©çš„æ™¯ç‚¹
+
+    currentSpotName: 'å…¨éƒ¨æ™¯ç‚¹', // å½“å‰é€‰æ‹©çš„æ™¯ç‚¹åç§°ï¼ˆç”¨äºæ˜¾ç¤ºï¼‰
+
+    scenicSpots: [], // æ™¯ç‚¹åˆ—è¡¨
+
     activeGroupCode: '',
-    activeGroupName: 'Ñ¡ÔñÀàĞÍ', // µ±Ç°Ñ¡ÔñµÄÈËÈºÀàĞÍÃû³Æ
+
+    activeGroupName: 'é€‰æ‹©ç±»å‹', // å½“å‰é€‰æ‹©çš„äººç¾¤ç±»å‹åç§°
+
     currentIndex: 0,
+
     groupTypes: [],
-    singleGroupTypes: [], // µ¥ÕÕÈËÈºÀàĞÍ
-    multiGroupTypes: [], // ºÏÕÕÈËÈºÀàĞÍ
-    photoTypeTab: 'single', // µ±Ç°Ñ¡ÖĞµÄÕÕÆ¬ÀàĞÍtab
+
+    singleGroupTypes: [], // å•ç…§äººç¾¤ç±»å‹
+
+    multiGroupTypes: [], // åˆç…§äººç¾¤ç±»å‹
+
+    photoTypeTab: 'single', // å½“å‰é€‰ä¸­çš„ç…§ç‰‡ç±»å‹tab
+
     templates: [],
+
     loading: false,
+
     loadingMore: false,
+
     refreshing: false,
+
     page: 0,
+
     pageSize: 10,
+
     hasMore: true,
+
     leftColumn: [],
+
     rightColumn: [],
+
     placeholderImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==',
+
     showCityPickerModal: false,
-    showSpotPickerModal: false, // ¾°µãÑ¡Ôñµ¯´°
-    showGroupTypePickerModal: false, // ÈËÈºÀàĞÍÑ¡Ôñµ¯´°
 
-    // ¶àÑ¡Ïà¹Ø
-    selectedTemplates: [], // ÒÑÑ¡Ä£°åIDÊı×é
-    totalPoints: 0, // ×Ü»ı·ÖÏûºÄ
-    deductPoints: 0, // µÖ¿Û»ı·Ö
-    payAmount: 0, // Êµ¼ÊÖ§¸¶½ğ¶î
-    showCartBar: false, // ÊÇ·ñÏÔÊ¾µ×²¿¹ºÎï³µ
+    showSpotPickerModal: false, // æ™¯ç‚¹é€‰æ‹©å¼¹çª—
 
-    // ÖÇÄÜ¹ö¶¯¿ØÖÆ
-    showFilters: true, // ÊÇ·ñÏÔÊ¾É¸Ñ¡À¸
-    lastScrollTop: 0, // ÉÏ´Î¹ö¶¯Î»ÖÃ
-    accumulatedScroll: 0 // ÀÛ»ı¹ö¶¯¾àÀë
+    showGroupTypePickerModal: false, // äººç¾¤ç±»å‹é€‰æ‹©å¼¹çª—
+
+
+
+    // å¤šé€‰ç›¸å…³
+
+    selectedTemplates: [], // å·²é€‰æ¨¡æ¿IDæ•°ç»„
+
+    totalPoints: 0, // æ€»ç§¯åˆ†æ¶ˆè€—
+
+    deductPoints: 0, // æŠµæ‰£ç§¯åˆ†
+
+    payAmount: 0, // å®é™…æ”¯ä»˜é‡‘é¢
+
+    showCartBar: false, // æ˜¯å¦æ˜¾ç¤ºåº•éƒ¨è´­ç‰©è½¦
+
+
+
+    // æ™ºèƒ½æ»šåŠ¨æ§åˆ¶
+
+    showFilters: true, // æ˜¯å¦æ˜¾ç¤ºç­›é€‰æ 
+
+    lastScrollTop: 0, // ä¸Šæ¬¡æ»šåŠ¨ä½ç½®
+
+    accumulatedScroll: 0 // ç´¯ç§¯æ»šåŠ¨è·ç¦»
+
   },
 
-  // ¹ö¶¯·À¶¶¶¨Ê±Æ÷
+
+
+  // æ»šåŠ¨é˜²æŠ–å®šæ—¶å™¨
+
   scrollDebounceTimer: null,
 
+
+
   // Image lazy load observer
+
   imageObserver: null,
+
   observedTemplateIds: new Set(),
+
   visibleTemplateIds: new Set(),
+
   supportsObserveAll: false,
+
   hasObservedAll: false,
+
   disableIntersectionObserver: false,
 
-  onLoad(options) {
-    // »ñÈ¡×´Ì¬À¸¸ß¶È
-    const systemInfo = wx.getSystemInfoSync()
-    this.setData({
-      statusBarHeight: systemInfo.statusBarHeight || 20
-    })
 
-    // ¼ÓÔØÓÃ»§»ı·Ö
+
+  onLoad(options) {
+
+    // è·å–çŠ¶æ€æ é«˜åº¦
+
+    this.initNavBar()
+
+
+
+    // åŠ è½½ç”¨æˆ·ç§¯åˆ†
+
     this.loadUserPoints()
 
-    // ¼ÓÔØ³ÇÊĞÁĞ±í
+
+
+    // åŠ è½½åŸå¸‚åˆ—è¡¨
+
     this.loadCities()
 
-    // ¼ÓÔØÈËÈºÀàĞÍ
+
+
+    // åŠ è½½äººç¾¤ç±»å‹
+
     this.loadGroupTypes()
+
   },
+
+
 
   onShow() {
-    // Ã¿´ÎÏÔÊ¾Ò³ÃæÊ±Ë¢ĞÂ»ı·Ö
+
+    // æ¯æ¬¡æ˜¾ç¤ºé¡µé¢æ—¶åˆ·æ–°ç§¯åˆ†
+
     this.loadUserPoints()
+
   },
+
+
 
   onUnload() {
+
     this.resetImageObserver()
+
   },
+
+
 
   onPullDownRefresh() {
+
     this.onRefresh()
+
   },
+
+    this.initNavBar()
+    try {
+      const systemInfo = wx.getSystemInfoSync()
+      const menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null
+      const statusBarHeight = systemInfo.statusBarHeight || 20
+      const navTop = menuButton ? menuButton.top : statusBarHeight
+      const navHeight = menuButton ? menuButton.height : 44
+      const navBarHeight = menuButton ? menuButton.bottom : (navTop + navHeight)
+
+      this.setData({
+        statusBarHeight,
+        navTop,
+        navHeight,
+        navBarHeight
+      })
+    } catch (error) {
+      this.setData({
+        statusBarHeight: 20,
+        navTop: 20,
+        navHeight: 44,
+        navBarHeight: 88
+      })
+    }
+  },
+
+
 
   getStoredTemplateVersion() {
+
     const value = Number(wx.getStorageSync(TEMPLATE_VERSION_KEY) || 0)
+
     return Number.isFinite(value) ? value : 0
+
   },
+
+
 
   async checkTemplateVersion() {
+
     try {
+
       const result = await templateApi.getVersion()
+
       const remoteVersion = result && result.version ? Number(result.version) : NaN
+
       if (!Number.isFinite(remoteVersion) || remoteVersion < 1) return false
+
       const localVersion = this.getStoredTemplateVersion()
+
       if (remoteVersion !== localVersion) {
+
         wx.setStorageSync(TEMPLATE_VERSION_KEY, remoteVersion)
+
         this.clearTemplateCache()
+
         return true
+
       }
+
     } catch (error) {
+
       console.log('[Version] load failed:', error)
+
     }
+
     return false
+
   },
+
+
 
   clearTemplateCache() {
+
     try {
+
       const info = wx.getStorageInfoSync()
+
       info.keys
+
         .filter((key) => key.indexOf(TEMPLATE_CACHE_PREFIX) === 0)
+
         .forEach((key) => wx.removeStorageSync(key))
+
     } catch (error) {
+
       console.log('[Cache] clear failed:', error)
+
     }
+
   },
+
+
 
   getTemplateCacheKey() {
+
     const photoType = this.data.photoTypeTab || 'single'
+
     const city = this.data.currentCity || 'all'
+
     const spot = this.data.currentSpot || 'all'
+
     const group = this.data.activeGroupCode || 'all'
+
     const parts = [photoType, city, spot, group].map((value) => encodeURIComponent(String(value)))
+
     return `${TEMPLATE_CACHE_PREFIX}${parts.join(':')}`
+
   },
+
+
 
   getCachedTemplates() {
+
     try {
+
       const key = this.getTemplateCacheKey()
+
       const cached = wx.getStorageSync(key)
+
       if (!cached) return null
+
       const parsed = JSON.parse(cached)
+
       if (!parsed || !Array.isArray(parsed.templates)) return null
+
       return parsed
+
     } catch (error) {
+
       console.log('[Cache] read failed:', error)
+
       return null
+
     }
+
   },
+
+
 
   saveTemplateCache(payload) {
+
     try {
+
       const key = this.getTemplateCacheKey()
+
       const data = {
+
         version: this.getStoredTemplateVersion(),
+
         templates: payload.templates || [],
+
         page: payload.page || 1,
+
         hasMore: payload.hasMore !== false,
+
         savedAt: Date.now()
+
       }
+
       wx.setStorageSync(key, JSON.stringify(data))
+
     } catch (error) {
+
       console.log('[Cache] save failed:', error)
+
     }
+
   },
+
+
 
   filterActiveTemplates(list) {
+
     return list.filter((item) => item && item.status !== 'inactive' && item.is_active !== false && item.isActive !== false)
+
   },
 
 
-  // ¼ÓÔØÓÃ»§»ı·Ö
+
+
+
+  // åŠ è½½ç”¨æˆ·ç§¯åˆ†
+
   async loadUserPoints() {
+
     try {
+
       const userOpenId = wx.getStorageSync('userOpenId')
+
       if (!userOpenId) return
 
+
+
       const result = await request({
+
         url: '/api/trpc/mp.getUserStatus',
+
         data: { userOpenId }
+
       })
+
+
 
       if (result && result.points !== undefined) {
+
         this.setData({ points: result.points })
+
       }
+
     } catch (error) {
-      console.error('¼ÓÔØ»ı·ÖÊ§°Ü:', error)
+
+      console.error('åŠ è½½ç§¯åˆ†å¤±è´¥:', error)
+
     }
+
   },
 
-  // ¼ÓÔØ³ÇÊĞÁĞ±í
+
+
+  // åŠ è½½åŸå¸‚åˆ—è¡¨
+
   async loadCities() {
+
     try {
+
       const citiesData = await templateApi.getCities()
-      console.log('[P8] Ô­Ê¼³ÇÊĞÊı¾İ:', JSON.stringify(citiesData))
 
-      // API·µ»ØµÄ¿ÉÄÜÊÇ¶ÔÏóÊı×é»ò×Ö·û´®Êı×é£¬Í³Ò»´¦ÀíÎª×Ö·û´®Êı×é
+      console.log('[P8] åŸå§‹åŸå¸‚æ•°æ®:', JSON.stringify(citiesData))
+
+
+
+      // APIè¿”å›çš„å¯èƒ½æ˜¯å¯¹è±¡æ•°ç»„æˆ–å­—ç¬¦ä¸²æ•°ç»„ï¼Œç»Ÿä¸€å¤„ç†ä¸ºå­—ç¬¦ä¸²æ•°ç»„
+
       const cities = (citiesData || []).map(c => {
-        if (typeof c === 'string') return c
-        if (c && typeof c === 'object' && c.name) return String(c.name)
-        return '' // ÎŞ·¨Ê¶±ğµÄ¸ñÊ½·µ»Ø¿Õ×Ö·û´®
-      }).filter(c => c) // ¹ıÂËµô¿Õ×Ö·û´®
 
-      console.log('[P8] ´¦ÀíºóµÄ³ÇÊĞÁĞ±í:', cities)
+        if (typeof c === 'string') return c
+
+        if (c && typeof c === 'object' && c.name) return String(c.name)
+
+        return '' // æ— æ³•è¯†åˆ«çš„æ ¼å¼è¿”å›ç©ºå­—ç¬¦ä¸²
+
+      }).filter(c => c) // è¿‡æ»¤æ‰ç©ºå­—ç¬¦ä¸²
+
+
+
+      console.log('[P8] å¤„ç†åçš„åŸå¸‚åˆ—è¡¨:', cities)
+
       this.setData({ cities })
 
-      // Ä¬ÈÏÑ¡ÔñµÚÒ»¸ö³ÇÊĞ
+
+
+      // é»˜è®¤é€‰æ‹©ç¬¬ä¸€ä¸ªåŸå¸‚
+
       if (cities && cities.length > 0 && !this.data.currentCity) {
+
         const firstCity = cities[0]
-        console.log('[P8] ÉèÖÃÄ¬ÈÏ³ÇÊĞ:', firstCity, typeof firstCity)
+
+        console.log('[P8] è®¾ç½®é»˜è®¤åŸå¸‚:', firstCity, typeof firstCity)
+
         this.setData({ currentCity: firstCity })
-        // ¼ÓÔØ¸Ã³ÇÊĞµÄ¾°µã
+
+        // åŠ è½½è¯¥åŸå¸‚çš„æ™¯ç‚¹
+
         this.loadScenicSpots(firstCity)
+
       }
+
     } catch (error) {
-      console.error('¼ÓÔØ³ÇÊĞÁĞ±íÊ§°Ü:', error)
+
+      console.error('åŠ è½½åŸå¸‚åˆ—è¡¨å¤±è´¥:', error)
+
     }
+
   },
 
-  // ¼ÓÔØ¾°µãÁĞ±í£¨¸ù¾İ³ÇÊĞ£©
+
+
+  // åŠ è½½æ™¯ç‚¹åˆ—è¡¨ï¼ˆæ ¹æ®åŸå¸‚ï¼‰
+
   async loadScenicSpots(city) {
+
     if (!city) return
 
-    try {
-      const spotsData = await templateApi.getScenicSpots(city)
-      console.log('[P8] Ô­Ê¼¾°µãÊı¾İ:', JSON.stringify(spotsData))
 
-      // API·µ»ØµÄ¿ÉÄÜÊÇ×Ö·û´®Êı×é»ò¶ÔÏóÊı×é£¬Í³Ò»´¦Àí
+
+    try {
+
+      const spotsData = await templateApi.getScenicSpots(city)
+
+      console.log('[P8] åŸå§‹æ™¯ç‚¹æ•°æ®:', JSON.stringify(spotsData))
+
+
+
+      // APIè¿”å›çš„å¯èƒ½æ˜¯å­—ç¬¦ä¸²æ•°ç»„æˆ–å¯¹è±¡æ•°ç»„ï¼Œç»Ÿä¸€å¤„ç†
+
       const spots = (spotsData || []).map(s => {
+
         if (typeof s === 'string') return s
+
         if (s && typeof s === 'object' && s.name) return String(s.name)
+
         if (s && typeof s === 'object' && s.scenicSpot) return String(s.scenicSpot)
+
         return ''
+
       }).filter(s => s)
 
-      console.log('[P8] ´¦ÀíºóµÄ¾°µãÁĞ±í:', spots)
 
-      // Ìí¼Ó"È«²¿"Ñ¡Ïî
+
+      console.log('[P8] å¤„ç†åçš„æ™¯ç‚¹åˆ—è¡¨:', spots)
+
+
+
+      // æ·»åŠ "å…¨éƒ¨"é€‰é¡¹
+
       const scenicSpots = [
-        { name: 'È«²¿¾°µã', value: '' },
+
+        { name: 'å…¨éƒ¨æ™¯ç‚¹', value: '' },
+
         ...spots.map(s => ({ name: s, value: s }))
+
       ]
 
-      console.log('[P8] ×îÖÕ¾°µãÑ¡Ïî:', JSON.stringify(scenicSpots))
+
+
+      console.log('[P8] æœ€ç»ˆæ™¯ç‚¹é€‰é¡¹:', JSON.stringify(scenicSpots))
+
+
 
       this.setData({
+
         scenicSpots,
-        currentSpot: '', // Ä¬ÈÏÑ¡Ôñ"È«²¿¾°µã"
-        currentSpotName: 'È«²¿¾°µã'
+
+        currentSpot: '', // é»˜è®¤é€‰æ‹©"å…¨éƒ¨æ™¯ç‚¹"
+
+        currentSpotName: 'å…¨éƒ¨æ™¯ç‚¹'
+
       })
+
     } catch (error) {
-      console.error('¼ÓÔØ¾°µãÁĞ±íÊ§°Ü:', error)
+
+      console.error('åŠ è½½æ™¯ç‚¹åˆ—è¡¨å¤±è´¥:', error)
+
       this.setData({
-        scenicSpots: [{ name: 'È«²¿¾°µã', value: '' }],
+
+        scenicSpots: [{ name: 'å…¨éƒ¨æ™¯ç‚¹', value: '' }],
+
         currentSpot: '',
-        currentSpotName: 'È«²¿¾°µã'
+
+        currentSpotName: 'å…¨éƒ¨æ™¯ç‚¹'
+
       })
+
     }
+
   },
 
-  // ¼ÓÔØÈËÈºÀàĞÍ£¨µ¥ÕÕºÍºÏÕÕ£©
-  async loadGroupTypes() {
-    try {
-      // ¼ÓÔØµ¥ÕÕÀàĞÍ
-      console.log('[P8] ¿ªÊ¼¼ÓÔØµ¥ÕÕÀàĞÍ...')
-      const singleData = await templateApi.getGroupTypes('single') || []
-      console.log('[P8] µ¥ÕÕÀàĞÍ½á¹û:', singleData.length, 'Ìõ', singleData)
 
-      // ¼ÓÔØºÏÕÕÀàĞÍ£¨Êı¾İ¿âÖĞÊ¹ÓÃ 'group' ¶ø·Ç 'multi'£©
-      console.log('[P8] ¿ªÊ¼¼ÓÔØºÏÕÕÀàĞÍ (photoType=group)...')
+
+  // åŠ è½½äººç¾¤ç±»å‹ï¼ˆå•ç…§å’Œåˆç…§ï¼‰
+
+  async loadGroupTypes() {
+
+    try {
+
+      // åŠ è½½å•ç…§ç±»å‹
+
+      console.log('[P8] å¼€å§‹åŠ è½½å•ç…§ç±»å‹...')
+
+      const singleData = await templateApi.getGroupTypes('single') || []
+
+      console.log('[P8] å•ç…§ç±»å‹ç»“æœ:', singleData.length, 'æ¡', singleData)
+
+
+
+      // åŠ è½½åˆç…§ç±»å‹ï¼ˆæ•°æ®åº“ä¸­ä½¿ç”¨ 'group' è€Œé 'multi'ï¼‰
+
+      console.log('[P8] å¼€å§‹åŠ è½½åˆç…§ç±»å‹ (photoType=group)...')
+
       let multiData = []
+
       try {
+
         multiData = await templateApi.getGroupTypes('group') || []
-        console.log('[P8] ºÏÕÕÀàĞÍ½á¹û:', multiData.length, 'Ìõ', multiData)
+
+        console.log('[P8] åˆç…§ç±»å‹ç»“æœ:', multiData.length, 'æ¡', multiData)
+
       } catch (e) {
-        console.error('[P8] ºÏÕÕÀàĞÍ¼ÓÔØÊ§°Ü:', e)
+
+        console.error('[P8] åˆç…§ç±»å‹åŠ è½½å¤±è´¥:', e)
+
       }
+
+
 
       const allTypes = [...singleData, ...multiData]
-      console.log('[P8] ×Ü¼ÆÈËÈºÀàĞÍ:', allTypes.length, 'Ìõ')
+
+      console.log('[P8] æ€»è®¡äººç¾¤ç±»å‹:', allTypes.length, 'æ¡')
+
+
 
       this.setData({
+
         groupTypes: allTypes,
+
         singleGroupTypes: singleData,
+
         multiGroupTypes: multiData
+
       })
 
-      // ÉèÖÃÄ¬ÈÏÑ¡ÖĞµÚÒ»¸öÈËÈºÀàĞÍ
+
+
+      // è®¾ç½®é»˜è®¤é€‰ä¸­ç¬¬ä¸€ä¸ªäººç¾¤ç±»å‹
+
       if (allTypes.length > 0 && !this.data.activeGroupCode) {
+
         const firstType = allTypes[0]
+
         this.setData({
+
           activeGroupCode: firstType.code || '',
-          activeGroupName: firstType.displayName || firstType.name || 'Ñ¡ÔñÀàĞÍ',
+
+          activeGroupName: firstType.displayName || firstType.name || 'é€‰æ‹©ç±»å‹',
+
           currentIndex: 0
+
         })
+
         const versionChanged = await this.checkTemplateVersion()
+
         this.loadTemplates({ reset: true, forceRefresh: versionChanged })
+
       } else if (allTypes.length === 0) {
-        console.warn('[P8] Î´¼ÓÔØµ½ÈÎºÎÈËÈºÀàĞÍ')
+
+        console.warn('[P8] æœªåŠ è½½åˆ°ä»»ä½•äººç¾¤ç±»å‹')
+
         wx.showToast({
-          title: 'ÔİÎŞ¿ÉÓÃÄ£°åÀàĞÍ',
+
+          title: 'æš‚æ— å¯ç”¨æ¨¡æ¿ç±»å‹',
+
           icon: 'none'
+
         })
+
       }
+
     } catch (error) {
-      console.error('[P8] ¼ÓÔØÈËÈºÀàĞÍÊ§°Ü:', error)
+
+      console.error('[P8] åŠ è½½äººç¾¤ç±»å‹å¤±è´¥:', error)
+
       wx.showToast({
-        title: 'Êı¾İ¼ÓÔØÊ§°Ü',
+
+        title: 'æ•°æ®åŠ è½½å¤±è´¥',
+
         icon: 'none'
+
       })
+
     }
+
   },
 
-  // ¼ÓÔØÄ£°åÁĞ±í
+
+
+  // åŠ è½½æ¨¡æ¿åˆ—è¡¨
+
   resetListState() {
+
     this.resetImageObserver()
+
     this.setData({
+
       templates: [],
+
       leftColumn: [],
+
       rightColumn: [],
+
       page: 0,
+
       hasMore: true
+
     })
+
   },
+
+
 
   normalizeTemplates(list) {
+
     const apiBaseUrl = getApp().globalData.apiBaseUrl
+
     return list.map((tpl) => {
+
       const item = { ...tpl }
+
       if (item.imageUrl && item.imageUrl.startsWith('/')) {
+
         item.imageUrl = apiBaseUrl + item.imageUrl
+
       }
+
       if (item.thumbnailUrl && item.thumbnailUrl.startsWith('/')) {
+
         item.thumbnailUrl = apiBaseUrl + item.thumbnailUrl
+
       }
+
       if (item.imageWebpUrl && item.imageWebpUrl.startsWith('/')) {
+
         item.imageWebpUrl = apiBaseUrl + item.imageWebpUrl
+
       }
+
       if (item.thumbnailWebpUrl && item.thumbnailWebpUrl.startsWith('/')) {
+
         item.thumbnailWebpUrl = apiBaseUrl + item.thumbnailWebpUrl
+
       }
+
       if (!item.thumbnailUrl && item.imageUrl) {
+
         item.thumbnailUrl = item.imageUrl
+
       }
+
       if (!item.thumbnailWebpUrl && item.imageWebpUrl) {
+
         item.thumbnailWebpUrl = item.imageWebpUrl
+
       }
+
       return item
+
     })
+
   },
+
+
 
   buildColumns(templates) {
+
     const leftColumn = []
+
     const rightColumn = []
 
+
+
     templates.forEach((tpl, index) => {
+
       const idKey = String(tpl.id)
+
       tpl.__visible = this.visibleTemplateIds.has(idKey)
+
       if (index % 2 === 0) {
+
         leftColumn.push(tpl)
+
       } else {
+
         rightColumn.push(tpl)
+
       }
+
     })
+
+
 
     return { leftColumn, rightColumn }
+
   },
+
+
 
   initImageObserver() {
+
     if (this.imageObserver) return
 
+
+
     this.imageObserver = wx.createIntersectionObserver(this)
+
     this.supportsObserveAll = typeof this.imageObserver.observeAll === 'function'
+
     this.hasObservedAll = false
+
     try {
+
       this.imageObserver.relativeTo('.templates-scroll', { bottom: 120 })
+
     } catch (error) {
+
       this.imageObserver.relativeToViewport({ bottom: 120 })
+
     }
+
   },
+
+
 
   observeTemplateItems() {
+
     if (!this.imageObserver) return
 
+
+
     if (this.disableIntersectionObserver) {
+
       this.markAllVisible()
+
       return
+
     }
+
+
 
     if (this.supportsObserveAll) {
+
       if (this.hasObservedAll) return
+
       this.hasObservedAll = true
+
       try {
+
         this.imageObserver.observeAll('.observe-item', (res) => {
+
           this.handleIntersectionEntries(res)
+
         })
+
       } catch (error) {
+
         console.log('[Observer] observeAll failed:', error)
+
         this.disableIntersectionObserver = true
+
         this.markAllVisible()
+
       }
+
       return
+
     }
+
+
 
     this.disableIntersectionObserver = true
+
     this.markAllVisible()
+
   },
+
+
 
   handleIntersectionEntries(res) {
+
     if (Array.isArray(res)) {
+
       res.forEach((entry) => this.handleTemplateIntersection(entry))
+
       return
+
     }
+
     this.handleTemplateIntersection(res)
+
   },
+
+
 
   markAllVisible() {
+
     const markVisible = (list) => list.map((tpl) => {
+
       if (!tpl || tpl.id === undefined || tpl.id === null) return tpl
+
       const idKey = String(tpl.id)
+
       this.visibleTemplateIds.add(idKey)
+
       return { ...tpl, __visible: true }
+
     })
 
+
+
     const leftColumn = markVisible(this.data.leftColumn)
+
     const rightColumn = markVisible(this.data.rightColumn)
+
     this.setData({ leftColumn, rightColumn })
+
   },
+
+
 
   handleTemplateIntersection(res) {
+
     if (!res || res.intersectionRatio <= 0) return
+
     const dataset = res.dataset || {}
+
     const column = dataset.column
+
     const index = Number(dataset.index)
+
     const idKey = dataset.id !== undefined ? String(dataset.id) : ''
 
+
+
     if (!column || Number.isNaN(index) || !idKey) return
+
     if (this.visibleTemplateIds.has(idKey)) return
 
+
+
     this.visibleTemplateIds.add(idKey)
+
     const listName = column === 'left' ? 'leftColumn' : 'rightColumn'
+
     const path = `${listName}[${index}].__visible`
+
     this.setData({ [path]: true })
+
   },
+
+
 
   resetImageObserver() {
+
     if (this.imageObserver) {
+
       this.imageObserver.disconnect()
+
       this.imageObserver = null
+
     }
+
     this.observedTemplateIds = new Set()
+
     this.visibleTemplateIds = new Set()
+
     this.supportsObserveAll = false
+
     this.hasObservedAll = false
+
     this.disableIntersectionObserver = false
+
   },
 
+
+
   // Load templates
+
   async loadTemplates(options = {}) {
+
     if (!this.data.activeGroupCode) return
 
+
+
     const reset = options.reset === true
+
     const forceRefresh = options.forceRefresh === true
+
     if (reset) {
+
       this.resetListState()
+
     } else if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
+
       return
+
     }
+
+
 
     const targetPage = reset ? 1 : this.data.page + 1
 
+
+
     if (reset) {
+
       this.setData({ loading: true, loadingMore: false })
+
     } else {
+
       this.setData({ loadingMore: true })
+
     }
+
+
 
     if (reset && !forceRefresh) {
+
       const cached = this.getCachedTemplates()
+
       if (cached && Array.isArray(cached.templates) && cached.templates.length > 0) {
+
         const cleaned = this.filterActiveTemplates(cached.templates)
+
         const normalizedCache = this.normalizeTemplates(cleaned)
+
         const cachedPage = Number(cached.page) || 1
+
         const cachedHasMore = cached.hasMore !== false
+
         const { leftColumn, rightColumn } = this.buildColumns(normalizedCache)
 
+
+
         this.setData({
+
           templates: normalizedCache,
+
           leftColumn,
+
           rightColumn,
+
           page: cachedPage,
+
           hasMore: cachedHasMore
+
         }, () => {
+
           this.initImageObserver()
+
           this.observeTemplateItems()
+
         })
 
+
+
         const cachedVersion = Number(cached.version) || 0
+
         const localVersion = this.getStoredTemplateVersion()
+
         if (cachedVersion && cachedVersion === localVersion) {
+
           this.setData({ loading: false, loadingMore: false })
+
           return
+
         }
+
       }
+
     }
+
+
+
 
 
     try {
+
       const params = {
+
         groupType: this.data.activeGroupCode,
+
         page: targetPage,
+
         pageSize: this.data.pageSize
+
       }
+
+
 
       if (this.data.currentCity) {
+
         params.city = this.data.currentCity
+
       }
 
+
+
       if (this.data.currentSpot) {
+
         params.scenicSpot = this.data.currentSpot
+
       }
+
+
 
       const data = await templateApi.getList(params)
 
+
+
       const list = Array.isArray(data) ? data : []
+
       const cleaned = this.filterActiveTemplates(list)
+
       const normalized = this.normalizeTemplates(cleaned)
+
       const templates = reset ? normalized : this.data.templates.concat(normalized)
+
       const { leftColumn, rightColumn } = this.buildColumns(templates)
+
       const hasMore = normalized.length >= this.data.pageSize
 
+
+
       this.setData({
+
         templates,
+
         leftColumn,
+
         rightColumn,
+
         page: targetPage,
+
         hasMore: hasMore
+
       }, () => {
+
         this.saveTemplateCache({
+
           templates,
+
           page: targetPage,
+
           hasMore
+
         })
+
         this.initImageObserver()
+
         this.observeTemplateItems()
+
       })
+
     } catch (error) {
+
       console.error('[P8] Load templates failed:', error)
+
       if (reset) {
+
         this.setData({
+
           templates: [],
+
           leftColumn: [],
+
           rightColumn: [],
+
           hasMore: false
+
         })
+
       }
+
       wx.showToast({
-        title: '¼ÓÔØÊ§°Ü£¬Çë¼ì²éÍøÂç',
+
+        title: 'åŠ è½½å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œ',
+
         icon: 'none'
+
       })
+
     } finally {
+
       this.setData({ loading: false, loadingMore: false })
+
     }
+
   },
+
+
 
   loadMore() {
+
     this.loadTemplates({ reset: false })
+
   },
+
+
 
   switchGroupType(e) {
+
     const code = e.currentTarget.dataset.code
+
     const index = parseInt(e.currentTarget.dataset.index)
+
     if (this.data.activeGroupCode === code) return
 
-    // ÇĞ»»ÈËÈºÀàĞÍÊ±Çå¿ÕÒÑÑ¡Ä£°å
+
+
+    // åˆ‡æ¢äººç¾¤ç±»å‹æ—¶æ¸…ç©ºå·²é€‰æ¨¡æ¿
+
     if (this.data.selectedTemplates.length > 0) {
+
       const hasWarned = wx.getStorageSync('hasWarnedGroupTypeSwitch')
+
       if (!hasWarned) {
+
         wx.showModal({
-          title: 'ÌáÊ¾',
-          content: 'ÇĞ»»ÈËÈºÀàĞÍºó£¬ÒÑÑ¡Ä£°å½«±»Çå¿Õ',
-          confirmText: '¼ÌĞø',
-          cancelText: 'È¡Ïû',
+
+          title: 'æç¤º',
+
+          content: 'åˆ‡æ¢äººç¾¤ç±»å‹åï¼Œå·²é€‰æ¨¡æ¿å°†è¢«æ¸…ç©º',
+
+          confirmText: 'ç»§ç»­',
+
+          cancelText: 'å–æ¶ˆ',
+
           success: (res) => {
+
             if (res.confirm) {
+
               wx.setStorageSync('hasWarnedGroupTypeSwitch', true)
+
               this.clearSelection()
+
               this.setData({
+
                 activeGroupCode: code,
+
                 currentIndex: index
+
               })
+
               this.loadTemplates({ reset: true })
+
             }
+
           }
+
         })
+
         return
+
       }
+
       this.clearSelection()
+
     }
 
+
+
     this.setData({
+
       activeGroupCode: code,
+
       currentIndex: index
+
     })
+
     this.loadTemplates({ reset: true })
+
   },
 
-  // swiper»¬¶¯ÇĞ»»
+
+
+  // swiperæ»‘åŠ¨åˆ‡æ¢
+
   onSwiperChange(e) {
+
     const index = e.detail.current
+
     const groupTypes = this.data.groupTypes
 
+
+
     if (index >= 0 && index < groupTypes.length) {
+
       const code = groupTypes[index].code
+
       if (this.data.activeGroupCode !== code) {
+
         this.setData({
+
           activeGroupCode: code,
+
           currentIndex: index
+
         })
+
         this.loadTemplates({ reset: true })
+
       }
+
     }
+
   },
 
-  // Ìø×ªµ½ÏêÇéÒ³
+
+
+  // è·³è½¬åˆ°è¯¦æƒ…é¡µ
+
   goToDetail(e) {
+
     const id = e.currentTarget.dataset.id
+
     wx.navigateTo({
+
       url: `/pages/template-detail/template-detail?id=${id}`
+
     })
+
   },
 
-  // Ô¤ÀÀÄ£°å´óÍ¼£¨È«ÆÁ£©
+
+
+  // é¢„è§ˆæ¨¡æ¿å¤§å›¾ï¼ˆå…¨å±ï¼‰
+
   previewTemplate(e) {
+
     const url = e.currentTarget.dataset.url
+
     if (!url) return
 
-    // ÊÕ¼¯ËùÓĞÄ£°åÍ¼Æ¬URLÓÃÓÚÔ¤ÀÀ
+
+
+    // æ”¶é›†æ‰€æœ‰æ¨¡æ¿å›¾ç‰‡URLç”¨äºé¢„è§ˆ
+
     const urls = this.data.templates
+
       .map(t => t.imageWebpUrl || t.imageUrl || t.thumbnailWebpUrl || t.thumbnailUrl)
+
       .filter(u => u)
+
     const current = url
 
+
+
     wx.previewImage({
+
       current,
+
       urls,
+
       fail: (err) => {
-        console.error('[P8] Ô¤ÀÀÍ¼Æ¬Ê§°Ü:', err)
+
+        console.error('[P8] é¢„è§ˆå›¾ç‰‡å¤±è´¥:', err)
+
       }
+
     })
+
   },
 
-  // ========== ÖÇÄÜ¹ö¶¯¿ØÖÆ ==========
+
+
+  // ========== æ™ºèƒ½æ»šåŠ¨æ§åˆ¶ ==========
+
   handleScroll(e) {
+
     const scrollTop = e.detail.scrollTop
+
     const scrollDelta = scrollTop - this.data.lastScrollTop
+
     const { selectedTemplates, showFilters, accumulatedScroll } = this.data
 
-    // Ö»ÓĞÑ¡ÖĞÄ£°åÊ±²ÅÆôÓÃÖÇÄÜ¹ö¶¯
+
+
+    // åªæœ‰é€‰ä¸­æ¨¡æ¿æ—¶æ‰å¯ç”¨æ™ºèƒ½æ»šåŠ¨
+
     if (selectedTemplates.length === 0) {
+
       if (!showFilters) {
+
         this.setData({ showFilters: true })
+
       }
+
       this.setData({ lastScrollTop: scrollTop })
+
       return
+
     }
 
-    // ·À¶¶´¦Àí
+
+
+    // é˜²æŠ–å¤„ç†
+
     if (this.scrollDebounceTimer) {
+
       clearTimeout(this.scrollDebounceTimer)
+
     }
+
+
 
     this.scrollDebounceTimer = setTimeout(() => {
+
       if (Math.abs(scrollDelta) > SCROLL_THRESHOLD) {
+
         if (scrollDelta > 0) {
-          // ÏòÏÂ¹ö¶¯ - Òş²ØÉ¸Ñ¡Æ÷£¬ÏÔÊ¾Ö§¸¶À¸
+
+          // å‘ä¸‹æ»šåŠ¨ - éšè—ç­›é€‰å™¨ï¼Œæ˜¾ç¤ºæ”¯ä»˜æ 
+
           this.setData({
+
             showFilters: false,
+
             showCartBar: true,
+
             accumulatedScroll: 0
+
           })
+
         } else {
-          // ÏòÉÏ¹ö¶¯ - ÀÛ»ı¾àÀë
+
+          // å‘ä¸Šæ»šåŠ¨ - ç´¯ç§¯è·ç¦»
+
           const newAccumulated = accumulatedScroll + Math.abs(scrollDelta)
+
           if (newAccumulated >= TEMPLATE_HEIGHT) {
-            // ÀÛ»ı³¬¹ıÒ»¸öÄ£°å¸ß¶È£¬ÏÔÊ¾É¸Ñ¡Æ÷£¬Òş²ØÖ§¸¶À¸
+
+            // ç´¯ç§¯è¶…è¿‡ä¸€ä¸ªæ¨¡æ¿é«˜åº¦ï¼Œæ˜¾ç¤ºç­›é€‰å™¨ï¼Œéšè—æ”¯ä»˜æ 
+
             this.setData({
+
               showFilters: true,
+
               showCartBar: false,
+
               accumulatedScroll: 0
+
             })
+
           } else {
+
             this.setData({ accumulatedScroll: newAccumulated })
+
           }
+
         }
+
       }
+
       this.setData({ lastScrollTop: scrollTop })
-    }, 16) // Ô¼60fps
+
+    }, 16) // çº¦60fps
+
   },
 
-  // ÏÂÀ­Ë¢ĞÂ
+
+
+  // ä¸‹æ‹‰åˆ·æ–°
+
   async onRefresh() {
+
     this.setData({ refreshing: true })
+
     await this.loadTemplates({ reset: true, forceRefresh: true })
+
     await this.loadUserPoints()
+
     this.setData({ refreshing: false })
+
     wx.stopPullDownRefresh()
+
   },
 
-  // ÏÔÊ¾³ÇÊĞÑ¡ÔñÆ÷
+
+
+  // æ˜¾ç¤ºåŸå¸‚é€‰æ‹©å™¨
+
   showCityPicker() {
+
     this.setData({ showCityPickerModal: true })
+
   },
 
-  // Òş²Ø³ÇÊĞÑ¡ÔñÆ÷
+
+
+  // éšè—åŸå¸‚é€‰æ‹©å™¨
+
   hideCityPicker() {
+
     this.setData({ showCityPickerModal: false })
+
   },
 
-  // Ñ¡Ôñ³ÇÊĞ£¨ÔÚÈ«ÆÁÑ¡ÔñÆ÷ÖĞ£¬Ö»¸üĞÂ¾°µãÁĞ±í£¬²»¹Ø±Õµ¯´°£©
+
+
+  // é€‰æ‹©åŸå¸‚ï¼ˆåœ¨å…¨å±é€‰æ‹©å™¨ä¸­ï¼Œåªæ›´æ–°æ™¯ç‚¹åˆ—è¡¨ï¼Œä¸å…³é—­å¼¹çª—ï¼‰
+
   selectCity(e) {
+
     const city = e.currentTarget.dataset.city
-    console.log('[P8] Ñ¡Ôñ³ÇÊĞ:', city, typeof city)
+
+    console.log('[P8] é€‰æ‹©åŸå¸‚:', city, typeof city)
+
     this.setData({
+
       currentCity: city
+
     })
-    // ¼ÓÔØ¸Ã³ÇÊĞµÄ¾°µã£¨²»¹Ø±Õµ¯´°£©
+
+    // åŠ è½½è¯¥åŸå¸‚çš„æ™¯ç‚¹ï¼ˆä¸å…³é—­å¼¹çª—ï¼‰
+
     this.loadScenicSpots(city)
+
   },
 
-  // ÏÔÊ¾¾°µãÑ¡ÔñÆ÷
+
+
+  // æ˜¾ç¤ºæ™¯ç‚¹é€‰æ‹©å™¨
+
   showSpotPicker() {
-    // Èç¹û³ÇÊĞÁĞ±íÎª¿Õ£¬ÏÈ¼ÓÔØ
+
+    // å¦‚æœåŸå¸‚åˆ—è¡¨ä¸ºç©ºï¼Œå…ˆåŠ è½½
+
     if (this.data.cities.length === 0) {
+
       this.loadCities()
+
     }
+
     this.setData({ showSpotPickerModal: true })
+
   },
 
-  // Òş²Ø¾°µãÑ¡ÔñÆ÷
+
+
+  // éšè—æ™¯ç‚¹é€‰æ‹©å™¨
+
   hideSpotPicker() {
+
     this.setData({ showSpotPickerModal: false })
+
   },
 
-  // Ñ¡Ôñ¾°µã
+
+
+  // é€‰æ‹©æ™¯ç‚¹
+
   selectSpot(e) {
+
     const spot = e.currentTarget.dataset.spot
+
     const spotName = e.currentTarget.dataset.name
 
+
+
     this.setData({
+
       currentSpot: spot,
+
       currentSpotName: spotName,
+
       showSpotPickerModal: false
+
     })
 
-    // ÖØĞÂ¼ÓÔØÄ£°å
+
+
+    // é‡æ–°åŠ è½½æ¨¡æ¿
+
     this.loadTemplates({ reset: true })
+
   },
 
-  // ÏÔÊ¾ÈËÈºÀàĞÍÑ¡ÔñÆ÷
+
+
+  // æ˜¾ç¤ºäººç¾¤ç±»å‹é€‰æ‹©å™¨
+
   showGroupTypePicker() {
+
     if (this.data.groupTypes.length === 0) {
+
       wx.showToast({
-        title: '¼ÓÔØÈËÈºÀàĞÍÖĞ...',
+
+        title: 'åŠ è½½äººç¾¤ç±»å‹ä¸­...',
+
         icon: 'none'
+
       })
+
       return
+
     }
+
     this.setData({ showGroupTypePickerModal: true })
+
   },
 
-  // Òş²ØÈËÈºÀàĞÍÑ¡ÔñÆ÷
+
+
+  // éšè—äººç¾¤ç±»å‹é€‰æ‹©å™¨
+
   hideGroupTypePicker() {
+
     this.setData({ showGroupTypePickerModal: false })
+
   },
 
-  // Ñ¡ÔñÈËÈºÀàĞÍ
+
+
+  // é€‰æ‹©äººç¾¤ç±»å‹
+
   selectGroupType(e) {
+
     const code = e.currentTarget.dataset.code
+
     const name = e.currentTarget.dataset.name
 
+
+
     if (this.data.activeGroupCode === code) {
+
       this.setData({ showGroupTypePickerModal: false })
+
       return
+
     }
 
-    // ÇĞ»»ÈËÈºÀàĞÍÊ±Çå¿ÕÒÑÑ¡Ä£°å
+
+
+    // åˆ‡æ¢äººç¾¤ç±»å‹æ—¶æ¸…ç©ºå·²é€‰æ¨¡æ¿
+
     if (this.data.selectedTemplates.length > 0) {
+
       this.clearSelection()
+
     }
+
+
 
     this.setData({
+
       activeGroupCode: code,
+
       activeGroupName: name,
+
       showGroupTypePickerModal: false
+
     })
+
     this.loadTemplates({ reset: true })
+
   },
 
-  // Ñ¡Ôñ¾°µã²¢¹Ø±Õµ¯´°£¨È«ÆÁÑ¡ÔñÆ÷ÓÃ£©
+
+
+  // é€‰æ‹©æ™¯ç‚¹å¹¶å…³é—­å¼¹çª—ï¼ˆå…¨å±é€‰æ‹©å™¨ç”¨ï¼‰
+
   selectSpotAndClose(e) {
+
     const spot = e.currentTarget.dataset.spot
+
     const spotName = e.currentTarget.dataset.name
 
-    console.log('[P8] Ñ¡Ôñ¾°µã:', spotName, spot)
+
+
+    console.log('[P8] é€‰æ‹©æ™¯ç‚¹:', spotName, spot)
+
+
 
     this.setData({
+
       currentSpot: spot,
+
       currentSpotName: spotName,
+
       showSpotPickerModal: false
+
     })
 
-    // ÖØĞÂ¼ÓÔØÄ£°å
+
+
+    // é‡æ–°åŠ è½½æ¨¡æ¿
+
     this.loadTemplates({ reset: true })
+
   },
 
-  // Ñ¡ÔñÈËÈºÀàĞÍ²¢¹Ø±Õµ¯´°£¨È«ÆÁÑ¡ÔñÆ÷ÓÃ£©
+
+
+  // é€‰æ‹©äººç¾¤ç±»å‹å¹¶å…³é—­å¼¹çª—ï¼ˆå…¨å±é€‰æ‹©å™¨ç”¨ï¼‰
+
   selectGroupTypeAndClose(e) {
+
     const code = e.currentTarget.dataset.code
+
     const name = e.currentTarget.dataset.name
 
+
+
     if (this.data.activeGroupCode === code) {
+
       this.setData({ showGroupTypePickerModal: false })
+
       return
+
     }
 
-    // ÇĞ»»ÈËÈºÀàĞÍÊ±Çå¿ÕÒÑÑ¡Ä£°å
+
+
+    // åˆ‡æ¢äººç¾¤ç±»å‹æ—¶æ¸…ç©ºå·²é€‰æ¨¡æ¿
+
     if (this.data.selectedTemplates.length > 0) {
+
       this.clearSelection()
+
     }
+
+
 
     this.setData({
+
       activeGroupCode: code,
+
       activeGroupName: name,
+
       showGroupTypePickerModal: false
+
     })
+
     this.loadTemplates({ reset: true })
+
   },
 
-  // ÇĞ»»ÕÕÆ¬ÀàĞÍtab£¨µ¥ÕÕ/ºÏÕÕ£©
+
+
+  // åˆ‡æ¢ç…§ç‰‡ç±»å‹tabï¼ˆå•ç…§/åˆç…§ï¼‰
+
   switchPhotoTypeTab(e) {
+
     const type = e.currentTarget.dataset.type
+
     this.setData({ photoTypeTab: type })
+
   },
 
-  // ========== Ä£°å¶àÑ¡¹¦ÄÜ ==========
 
-  // ÇĞ»»Ä£°åÑ¡ÖĞ×´Ì¬
+
+  // ========== æ¨¡æ¿å¤šé€‰åŠŸèƒ½ ==========
+
+
+
+  // åˆ‡æ¢æ¨¡æ¿é€‰ä¸­çŠ¶æ€
+
   toggleTemplateSelect(e) {
+
     const id = e.currentTarget.dataset.id
+
     let selectedTemplates = [...this.data.selectedTemplates]
 
+
+
     const index = selectedTemplates.indexOf(id)
+
     if (index > -1) {
-      // È¡ÏûÑ¡ÖĞ
+
+      // å–æ¶ˆé€‰ä¸­
+
       selectedTemplates.splice(index, 1)
+
     } else {
-      // Ñ¡ÖĞ
+
+      // é€‰ä¸­
+
       selectedTemplates.push(id)
+
     }
+
+
 
     this.setData({ selectedTemplates })
+
     this.calculateTotal()
+
   },
 
-  // ¼ÆËã×Ü¼ÛºÍ»ı·ÖµÖ¿Û
+
+
+  // è®¡ç®—æ€»ä»·å’Œç§¯åˆ†æŠµæ‰£
+
   calculateTotal() {
+
     const { selectedTemplates, templates, points } = this.data
 
+
+
     if (selectedTemplates.length === 0) {
+
       this.setData({
+
         totalPoints: 0,
+
         deductPoints: 0,
+
         payAmount: 0,
+
         showCartBar: false
+
       })
+
       return
+
     }
 
-    // ÕÒ³öËùÓĞÑ¡ÖĞµÄÄ£°å¶ÔÏó
+
+
+    // æ‰¾å‡ºæ‰€æœ‰é€‰ä¸­çš„æ¨¡æ¿å¯¹è±¡
+
     const selectedObjs = templates.filter(t => selectedTemplates.includes(t.id))
 
-    // ¼ÆËã×Ü»ı·ÖÏûºÄ
+
+
+    // è®¡ç®—æ€»ç§¯åˆ†æ¶ˆè€—
+
     const totalPoints = selectedObjs.reduce((sum, t) => sum + (t.pointsCost || 1), 0)
 
-    // ¼ÆËã»ı·ÖµÖ¿Û£¨×î¶àµÖ¿Û×Ü»ı·Ö£©
+
+
+    // è®¡ç®—ç§¯åˆ†æŠµæ‰£ï¼ˆæœ€å¤šæŠµæ‰£æ€»ç§¯åˆ†ï¼‰
+
     const deductPoints = Math.min(points, totalPoints)
 
-    // ¼ÆËãÊµ¼ÊÖ§¸¶½ğ¶î£¨1»ı·Ö=1Ôª£©
+
+
+    // è®¡ç®—å®é™…æ”¯ä»˜é‡‘é¢ï¼ˆ1ç§¯åˆ†=1å…ƒï¼‰
+
     const payAmount = totalPoints - deductPoints
 
+
+
     this.setData({
+
       totalPoints,
+
       deductPoints,
+
       payAmount,
+
       showCartBar: true
+
     })
+
   },
 
-  // Çå¿ÕÑ¡Ôñ
+
+
+  // æ¸…ç©ºé€‰æ‹©
+
   clearSelection() {
+
     this.setData({
+
       selectedTemplates: [],
+
       totalPoints: 0,
+
       deductPoints: 0,
+
       payAmount: 0,
+
       showCartBar: false
+
     })
+
   },
 
-  // ¼ì²éÄ£°åÊÇ·ñ±»Ñ¡ÖĞ
+
+
+  // æ£€æŸ¥æ¨¡æ¿æ˜¯å¦è¢«é€‰ä¸­
+
   isTemplateSelected(templateId) {
+
     return this.data.selectedTemplates.includes(templateId)
+
   },
 
-  // ========== Ö§¸¶Á÷³Ì ==========
 
-  // ´¦ÀíÖ§¸¶
+
+  // ========== æ”¯ä»˜æµç¨‹ ==========
+
+
+
+  // å¤„ç†æ”¯ä»˜
+
   async handlePay() {
+
     const { selectedTemplates, payAmount, totalPoints, deductPoints } = this.data
 
+
+
     if (selectedTemplates.length === 0) {
+
       wx.showToast({
-        title: 'ÇëÏÈÑ¡ÔñÄ£°å',
+
+        title: 'è¯·å…ˆé€‰æ‹©æ¨¡æ¿',
+
         icon: 'none'
+
       })
+
       return
+
     }
 
-    // ÏÔÊ¾Ö§¸¶È·ÈÏ
+
+
+    // æ˜¾ç¤ºæ”¯ä»˜ç¡®è®¤
+
     const confirmText = payAmount > 0
-      ? `¹²ÏûºÄ${totalPoints}»ı·Ö£¬ÒÑµÖ¿Û${deductPoints}·Ö£¬»¹ĞèÖ§¸¶${payAmount}Ôª`
-      : `¹²ÏûºÄ${totalPoints}»ı·Ö£¬ÒÑÍêÈ«µÖ¿Û£¬ÎŞĞèÖ§¸¶ÏÖ½ğ`
+
+      ? `å…±æ¶ˆè€—${totalPoints}ç§¯åˆ†ï¼Œå·²æŠµæ‰£${deductPoints}åˆ†ï¼Œè¿˜éœ€æ”¯ä»˜${payAmount}å…ƒ`
+
+      : `å…±æ¶ˆè€—${totalPoints}ç§¯åˆ†ï¼Œå·²å®Œå…¨æŠµæ‰£ï¼Œæ— éœ€æ”¯ä»˜ç°é‡‘`
+
+
 
     wx.showModal({
-      title: 'È·ÈÏÖ§¸¶',
+
+      title: 'ç¡®è®¤æ”¯ä»˜',
+
       content: confirmText,
-      confirmText: 'È·ÈÏ',
-      cancelText: 'È¡Ïû',
+
+      confirmText: 'ç¡®è®¤',
+
+      cancelText: 'å–æ¶ˆ',
+
       success: async (res) => {
+
         if (res.confirm) {
+
           if (payAmount === 0) {
-            // »ı·ÖÍêÈ«µÖ¿Û£¬Ö±½Ó´´½¨¶©µ¥
+
+            // ç§¯åˆ†å®Œå…¨æŠµæ‰£ï¼Œç›´æ¥åˆ›å»ºè®¢å•
+
             await this.createPhotos()
+
           } else {
-            // ĞèÒªÎ¢ĞÅÖ§¸¶
+
+            // éœ€è¦å¾®ä¿¡æ”¯ä»˜
+
             await this.wxPay()
+
           }
+
         }
+
       }
+
     })
+
   },
 
-  // Î¢ĞÅÖ§¸¶
+
+
+  // å¾®ä¿¡æ”¯ä»˜
+
   async wxPay() {
+
     wx.showToast({
-      title: 'Î¢ĞÅÖ§¸¶¿ª·¢ÖĞ',
+
+      title: 'å¾®ä¿¡æ”¯ä»˜å¼€å‘ä¸­',
+
       icon: 'none',
+
       duration: 2000
+
     })
-    // TODO: ÊµÏÖÎ¢ĞÅÖ§¸¶Á÷³Ì
-    // 1. µ÷ÓÃºó¶Ë´´½¨Ö§¸¶¶©µ¥
-    // 2. »ñÈ¡Ö§¸¶²ÎÊı
-    // 3. µ÷ÓÃwx.requestPayment
-    // 4. Ö§¸¶³É¹¦ºóµ÷ÓÃcreatePhotos
+
+    // TODO: å®ç°å¾®ä¿¡æ”¯ä»˜æµç¨‹
+
+    // 1. è°ƒç”¨åç«¯åˆ›å»ºæ”¯ä»˜è®¢å•
+
+    // 2. è·å–æ”¯ä»˜å‚æ•°
+
+    // 3. è°ƒç”¨wx.requestPayment
+
+    // 4. æ”¯ä»˜æˆåŠŸåè°ƒç”¨createPhotos
+
   },
 
-  // ´´½¨ÕÕÆ¬Éú³ÉÈÎÎñ
+
+
+  // åˆ›å»ºç…§ç‰‡ç”Ÿæˆä»»åŠ¡
+
   async createPhotos() {
+
     const { selectedTemplates } = this.data
+
     const userOpenId = wx.getStorageSync('userOpenId')
 
+
+
     if (!userOpenId) {
+
       wx.showToast({
-        title: 'ÇëÏÈµÇÂ¼',
+
+        title: 'è¯·å…ˆç™»å½•',
+
         icon: 'none'
+
       })
+
       return
+
     }
 
-    wx.showLoading({ title: 'ÕıÔÚ´´½¨ÈÎÎñ...' })
+
+
+    wx.showLoading({ title: 'æ­£åœ¨åˆ›å»ºä»»åŠ¡...' })
+
+
 
     try {
-      // »ñÈ¡ÓÃ»§×îºóÒ»´ÎÉÏ´«µÄ×ÔÅÄÕÕ
+
+      // è·å–ç”¨æˆ·æœ€åä¸€æ¬¡ä¸Šä¼ çš„è‡ªæ‹ç…§
+
       const userStatus = wx.getStorageSync('userStatus')
+
       const lastSelfieUrl = userStatus?.lastSelfieUrl
 
+
+
       if (!lastSelfieUrl) {
+
         wx.hideLoading()
+
         wx.showModal({
-          title: 'ÌáÊ¾',
-          content: 'Î´ÕÒµ½×ÔÅÄÕÕ£¬ÇëÏÈÉÏ´«×ÔÅÄ',
-          confirmText: 'È¥ÉÏ´«',
+
+          title: 'æç¤º',
+
+          content: 'æœªæ‰¾åˆ°è‡ªæ‹ç…§ï¼Œè¯·å…ˆä¸Šä¼ è‡ªæ‹',
+
+          confirmText: 'å»ä¸Šä¼ ',
+
           success: (res) => {
+
             if (res.confirm) {
+
               wx.redirectTo({
+
                 url: '/pages/index/index'
+
               })
+
             }
+
           }
+
         })
+
         return
+
       }
 
-      // µ÷ÓÃºó¶ËAPI´´½¨ÅúÁ¿ÕÕÆ¬ÈÎÎñ
+
+
+      // è°ƒç”¨åç«¯APIåˆ›å»ºæ‰¹é‡ç…§ç‰‡ä»»åŠ¡
+
       const result = await request({
+
         url: '/api/trpc/photo.createBatchPublic',
+
         method: 'POST',
+
         data: {
+
           userOpenId,
+
           templateIds: selectedTemplates,
+
           selfieUrl: lastSelfieUrl
+
         }
+
       })
 
+
+
       wx.hideLoading()
+
+
 
       if (result && result.photoIds && result.photoIds.length > 0) {
-        // ±£´æ´ı´¦Àí¶©µ¥ĞÅÏ¢µ½Storage
+
+        // ä¿å­˜å¾…å¤„ç†è®¢å•ä¿¡æ¯åˆ°Storage
+
         wx.setStorageSync('pendingOrder', {
-          photoId: result.photoIds[0], // Ö÷photoId
+
+          photoId: result.photoIds[0], // ä¸»photoId
+
           photoIds: result.photoIds,
+
           photoCount: selectedTemplates.length
+
         })
 
-        // Ìø×ªµ½Éú³ÉµÈ´ıÒ³
+
+
+        // è·³è½¬åˆ°ç”Ÿæˆç­‰å¾…é¡µ
+
         wx.redirectTo({
+
           url: '/pages/generating/generating'
+
         })
+
       } else {
-        throw new Error('´´½¨ÈÎÎñÊ§°Ü')
+
+        throw new Error('åˆ›å»ºä»»åŠ¡å¤±è´¥')
+
       }
+
     } catch (error) {
+
       wx.hideLoading()
-      console.error('´´½¨ÕÕÆ¬Ê§°Ü:', error)
+
+      console.error('åˆ›å»ºç…§ç‰‡å¤±è´¥:', error)
+
       wx.showModal({
-        title: '´´½¨Ê§°Ü',
-        content: error.message || '´´½¨ÕÕÆ¬ÈÎÎñÊ§°Ü£¬ÇëÖØÊÔ',
+
+        title: 'åˆ›å»ºå¤±è´¥',
+
+        content: error.message || 'åˆ›å»ºç…§ç‰‡ä»»åŠ¡å¤±è´¥ï¼Œè¯·é‡è¯•',
+
         showCancel: false
+
       })
+
     }
+
   },
 
-  // Ìø×ªµ½»ı·ÖÏêÇéÒ³£¨Ô¤Áô£©
+
+
+  // è·³è½¬åˆ°ç§¯åˆ†è¯¦æƒ…é¡µï¼ˆé¢„ç•™ï¼‰
+
   goToPointsDetail() {
+
     wx.showToast({
-      title: '»ı·ÖÏêÇé¿ª·¢ÖĞ',
+
+      title: 'ç§¯åˆ†è¯¦æƒ…å¼€å‘ä¸­',
+
       icon: 'none'
+
     })
+
   },
 
-  // ·µ»ØÎÒµÄÕÕÆ¬Ò³Ãæ
+
+
+  // è¿”å›æˆ‘çš„ç…§ç‰‡é¡µé¢
+
   goBack() {
+
     wx.redirectTo({
+
       url: '/pages/my-photos/my-photos'
+
     })
+
   }
+
 })
+
+
+
+
+
+
+
 
 
 

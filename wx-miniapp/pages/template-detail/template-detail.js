@@ -6,10 +6,14 @@ Page({
     template: null,
     loading: true,
     templateId: 0,
-    errorMessage: ''
+    errorMessage: '',
+    navTop: 0,
+    navHeight: 44,
+    navBarHeight: 88
   },
 
   onLoad(options) {
+    this.initNavBar()
     const templateId = Number(options && options.id)
     if (!templateId || Number.isNaN(templateId)) {
       this.setData({
@@ -44,6 +48,30 @@ Page({
     }
 
     this.loadTemplate()
+  },
+
+  initNavBar() {
+    try {
+      const systemInfo = wx.getSystemInfoSync()
+      const menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null
+      const statusBarHeight = systemInfo.statusBarHeight || 20
+      const navTop = menuButton ? menuButton.top : statusBarHeight
+      const navHeight = menuButton ? menuButton.height : 44
+      const navBarHeight = menuButton ? menuButton.bottom : (navTop + navHeight)
+
+      this.setData({
+        navTop,
+        navHeight,
+        navBarHeight
+      })
+    } catch (error) {
+      // fall back to defaults
+      this.setData({
+        navTop: 20,
+        navHeight: 44,
+        navBarHeight: 88
+      })
+    }
   },
 
   // 归一化模板数据

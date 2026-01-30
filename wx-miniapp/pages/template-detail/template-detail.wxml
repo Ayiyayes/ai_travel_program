@@ -5,19 +5,21 @@
   </view>
 
   <view wx:elif="{{template}}" class="content">
+    <!-- 自定义顶部系统栏 -->
+    <view class="top-bar" style="height: {{navBarHeight}}px;">
+      <view class="back-btn" style="margin-top: {{navTop}}px; height: {{navHeight}}px;" catchtap="goBack">
+        <text class="back-icon">‹</text>
+        <text class="back-text">返回</text>
+      </view>
+    </view>
+
     <!-- 全屏模板图片 -->
     <image
       src="{{template.imageWebpUrl || template.imageUrl || template.thumbnailWebpUrl || template.thumbnailUrl}}"
-      mode="aspectFill"
+      mode="widthFix"
       class="fullscreen-image"
       binderror="onImageError"
     />
-
-    <!-- 返回按钮 -->
-    <view class="back-btn" catchtap="goBack">
-      <text class="back-icon">‹</text>
-      <text class="back-text">返回</text>
-    </view>
 
     <!-- 拍照按钮 -->
     <view class="photo-btn-wrapper" catchtap="startPhoto">

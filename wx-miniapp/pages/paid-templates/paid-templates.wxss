@@ -16,20 +16,22 @@ page {
 .custom-navbar {
   background-color: #fdf9f6;
   flex-shrink: 0;
+  position: relative;
 }
 
 .navbar-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10rpx 30rpx;
+  height: 100%;
+  padding: 0 30rpx;
 }
 
 /* 返回按钮 */
 .nav-back {
   display: flex;
   align-items: center;
-  padding: 8rpx 16rpx;
+  padding: 0;
 }
 
 .back-arrow {
@@ -283,7 +285,9 @@ page {
   right: 16rpx;
   width: 56rpx;
   height: 56rpx;
-  background: rgba(180, 180, 180, 0.6);
+  box-sizing: border-box;
+  background: rgba(253, 249, 246, 0.3);
+  border: 2rpx solid #ffffff;
   border-radius: 12rpx;
   display: flex;
   align-items: center;
@@ -294,7 +298,8 @@ page {
 }
 
 .select-checkbox.selected {
-  background: linear-gradient(135deg, #e89a8d 0%, #d4956b 100%);
+  background: rgba(253, 249, 246, 0.6);
+  border: 2rpx solid #ffffff;
 }
 
 .checkbox-icon {

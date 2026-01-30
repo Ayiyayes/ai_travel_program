@@ -1,10 +1,10 @@
 ﻿<!--P8 付费模板选择页 - 老用户入口-->
 <view class="container">
   <!-- 自定义导航栏 -->
-  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+  <view class="custom-navbar" style="height: {{navBarHeight}}px;">
     <view class="navbar-content">
       <!-- 返回按钮 - 跳转到我的照片 -->
-      <view class="nav-back" bindtap="goBack">
+      <view class="nav-back" style="margin-top: {{navTop}}px; height: {{navHeight}}px;" bindtap="goBack">
         <text class="back-arrow">‹</text>
         <text class="back-text">我的照片</text>
       </view>

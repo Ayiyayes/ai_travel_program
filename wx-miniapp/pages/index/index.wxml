@@ -1,138 +1,138 @@
-<!--йврЁ - дё╟Еап╠М-->
-<view class="container">
-  <!-- вт╤╗рЕ╣╪╨╫ю╦ -->
-  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
-    <view class="navbar-content">
-      <view class="navbar-placeholder"></view>
-      <view class="navbar-title">я║тЯдЦ╣дцноКк╡╪Д</view>
-      <view class="my-photos-btn" bindtap="goToMyPhotos">
-        <text class="my-photos-text">нр╣дууф╛</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- хкх╨юЮпм╠Йг╘ -->
-  <scroll-view
-    scroll-x
-    class="tabs-wrapper"
-    scroll-into-view="tab-{{activeGroupCode}}"
-    scroll-with-animation
-   style="height: 86rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx">
-    <view class="tabs">
-      <view
-        wx:for="{{groupTypes}}"
-        wx:key="code"
-        id="tab-{{item.code}}"
-        class="tab-item {{activeGroupCode === item.code ? 'active' : ''}}"
-        bindtap="switchGroupType"
-        data-code="{{item.code}}"
-        data-index="{{index}}"
-      >
-        <text class="tab-text">{{item.displayName}}</text>
-        <view wx:if="{{activeGroupCode === item.code}}" class="tab-indicator" style="height: 10rpx; display: block; box-sizing: border-box; left: 0rpx; top: 54rpx"></view>
-      </view>
-    </view>
-  </scroll-view>
-
-  <!-- дё╟Еап╠М swiper -->
-  <swiper
-    wx:if="{{groupTypes.length > 0}}"
-    class="templates-swiper"
-    current="{{currentIndex}}"
-    bindchange="onSwiperChange"
-    duration="300"
-  >
-    <swiper-item wx:for="{{groupTypes}}" wx:key="code">
-      <scroll-view
-        id="templates-scroll-{{item.code}}"
-        scroll-y
-        class="templates-scroll"
-        refresher-enabled
-        refresher-triggered="{{refreshing}}"
-        bindrefresherrefresh="onRefresh"
-        bindscrolltolower="loadMore"
-        lower-threshold="200"
-      >
-        <view wx:if="{{loading && activeGroupCode === item.code}}" class="waterfall">
-          <!-- ╧г╪эфа - вСап -->
-          <view class="column">
-            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
-              <view class="skeleton-image"></view>
-            </view>
-          </view>
-          <!-- ╧г╪эфа - срап -->
-          <view class="column">
-            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
-              <view class="skeleton-image"></view>
-            </view>
-          </view>
-        </view>
-
-        <view wx:elif="{{activeGroupCode === item.code && templates.length > 0}}">
-          <view class="waterfall">
-            <!-- вСап -->
-            <view class="column">
-              <view
-                wx:for="{{leftColumn}}"
-                wx:for-item="tpl"
-                wx:key="id"
-                class="template-item observe-item"
-                id="tpl-{{tpl.id}}"
-                data-id="{{tpl.id}}"
-                data-column="left"
-                data-index="{{index}}"
-                bindtap="goToDetail"
-              >
-                <image
-                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
-                  mode="aspectFill"
-                  class="template-image"
-                  lazy-load="true"
-                />
-              </view>
-            </view>
-
-            <!-- срап -->
-            <view class="column">
-              <view
-                wx:for="{{rightColumn}}"
-                wx:for-item="tpl"
-                wx:key="id"
-                class="template-item observe-item"
-                id="tpl-{{tpl.id}}"
-                data-id="{{tpl.id}}"
-                data-column="right"
-                data-index="{{index}}"
-                bindtap="goToDetail"
-              >
-                <image
-                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
-                  mode="aspectFill"
-                  class="template-image"
-                  lazy-load="true"
-                />
-              </view>
-            </view>
-          </view>
-
-          <view class="load-more" wx:if="{{loadingMore || !hasMore}}">
-            <text wx:if="{{loadingMore}}">уЩтз╪сть╦Э╤Ю...</text>
-            <text wx:elif="{{!hasMore}}">ря╬╜╣╫╣вак</text>
-          </view>
-        </view>
-
-        <view wx:elif="{{activeGroupCode === item.code}}" class="empty">
-          <text class="empty-text">тщнчдё╟Е</text>
-        </view>
-      </scroll-view>
-    </swiper-item>
-  </swiper>
-
-  <!-- нчйЩ╬щй╠╣длАй╬ -->
-  <view wx:if="{{groupTypes.length === 0 && !loading}}" class="empty-state">
-    <text class="empty-text">нч╥╗╪стьйЩ╬щё╛гК╪Л╡ИмЬбГа╛╫с</text>
-    <view class="retry-btn" bindtap="loadGroupTypes">
-      <text>╣Ц╩Вжьйт</text>
-    </view>
-  </view>
-</view>
+<!--И╕√И║╣ - Ф╗║Ф²©Е┬≈Х║╗-->
+<view class="container">
+  <!-- Х┤╙Е╝ Д╧┴Е╞╪Х┬╙Ф═▐ -->
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-content">
+      <view class="navbar-placeholder"></view>
+      <view class="navbar-title">И─┴Ф▀╘Д╫═Г └Ф╒╕Ф┐ЁГ·╛И≈╢</view>
+      <view class="my-photos-btn" bindtap="goToMyPhotos">
+        <text class="my-photos-text">Ф┬▒Г └Г┘╖Г┴┤</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Д╨╨Г╬╓Г╠╩Е·▀Ф═┤Г╜╬ -->
+  <scroll-view
+    scroll-x
+    class="tabs-wrapper"
+    scroll-into-view="tab-{{activeGroupCode}}"
+    scroll-with-animation
+   style="height: 86rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx">
+    <view class="tabs">
+      <view
+        wx:for="{{groupTypes}}"
+        wx:key="code"
+        id="tab-{{item.code}}"
+        class="tab-item {{activeGroupCode === item.code ? 'active' : ''}}"
+        bindtap="switchGroupType"
+        data-code="{{item.code}}"
+        data-index="{{index}}"
+      >
+        <text class="tab-text">{{item.displayName}}</text>
+        <view wx:if="{{activeGroupCode === item.code}}" class="tab-indicator" style="height: 10rpx; display: block; box-sizing: border-box; left: 0rpx; top: 54rpx"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Ф╗║Ф²©Е┬≈Х║╗ swiper -->
+  <swiper
+    wx:if="{{groupTypes.length > 0}}"
+    class="templates-swiper"
+    current="{{currentIndex}}"
+    bindchange="onSwiperChange"
+    duration="300"
+  >
+    <swiper-item wx:for="{{groupTypes}}" wx:key="code">
+      <scroll-view
+        id="templates-scroll-{{item.code}}"
+        scroll-y
+        class="templates-scroll"
+        refresher-enabled
+        refresher-triggered="{{refreshing}}"
+        bindrefresherrefresh="onRefresh"
+        bindscrolltolower="loadMore"
+        lower-threshold="200"
+      >
+        <view wx:if="{{loading && activeGroupCode === item.code}}" class="waterfall">
+          <!-- И╙╗Ф·╤Е╠▐ - Е╥╕Е┬≈ -->
+          <view class="column">
+            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+              <view class="skeleton-image"></view>
+            </view>
+          </view>
+          <!-- И╙╗Ф·╤Е╠▐ - Е▐ЁЕ┬≈ -->
+          <view class="column">
+            <view wx:for="{{[1,2,3]}}" wx:key="*this" class="template-item skeleton">
+              <view class="skeleton-image"></view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:elif="{{activeGroupCode === item.code && templates.length > 0}}">
+          <view class="waterfall">
+            <!-- Е╥╕Е┬≈ -->
+            <view class="column">
+              <view
+                wx:for="{{leftColumn}}"
+                wx:for-item="tpl"
+                wx:key="id"
+                class="template-item observe-item"
+                id="tpl-{{tpl.id}}"
+                data-id="{{tpl.id}}"
+                data-column="left"
+                data-index="{{index}}"
+                bindtap="goToDetail"
+              >
+                <image
+                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                  mode="aspectFill"
+                  class="template-image"
+                  lazy-load="true"
+                />
+              </view>
+            </view>
+
+            <!-- Е▐ЁЕ┬≈ -->
+            <view class="column">
+              <view
+                wx:for="{{rightColumn}}"
+                wx:for-item="tpl"
+                wx:key="id"
+                class="template-item observe-item"
+                id="tpl-{{tpl.id}}"
+                data-id="{{tpl.id}}"
+                data-column="right"
+                data-index="{{index}}"
+                bindtap="goToDetail"
+              >
+                <image
+                  src="{{tpl.__visible ? (tpl.thumbnailWebpUrl || tpl.thumbnailUrl || tpl.imageWebpUrl || tpl.imageUrl) : placeholderImage}}"
+                  mode="aspectFill"
+                  class="template-image"
+                  lazy-load="true"
+                />
+              </view>
+            </view>
+          </view>
+
+          <view class="load-more" wx:if="{{loadingMore || !hasMore}}">
+            <text wx:if="{{loadingMore}}">Ф╜ёЕ°╗Е┼═Х╫╫Ф⌡╢Е╓ ...</text>
+            <text wx:elif="{{!hasMore}}">Е╥╡Г╩▐Е┬╟Е╨∙Д╨├</text>
+          </view>
+        </view>
+
+        <view wx:elif="{{activeGroupCode === item.code}}" class="empty">
+          <text class="empty-text">Ф ┌Ф≈═Ф╗║Ф²©</text>
+        </view>
+      </scroll-view>
+    </swiper-item>
+  </swiper>
+
+  <!-- Ф≈═Ф∙╟Ф█╝Ф≈╤Г └Ф▐░Г╓╨ -->
+  <view wx:if="{{groupTypes.length === 0 && !loading}}" class="empty-state">
+    <text class="empty-text">Ф≈═ФЁ∙Е┼═Х╫╫Ф∙╟Ф█╝О╪▄Х╞╥Фё─Ф÷╔Г╫▒Г╩°Х©·Ф▌╔</text>
+    <view class="retry-btn" bindtap="loadGroupTypes">
+      <text>Г┌╧Е┤╩И┤█Х╞∙</text>
+    </view>
+  </view>
+</view>

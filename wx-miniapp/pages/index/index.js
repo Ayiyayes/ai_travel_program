@@ -1,627 +1,627 @@
-// pages/index/index.js
-const { templateApi, promotionApi } = require('../../utils/api.js')
-
-const TEMPLATE_VERSION_KEY = 'templateVersion'
-const TEMPLATE_CACHE_PREFIX = 'templateCache:p1:'
-
-
-Page({
-  data: {
-    statusBarHeight: 20,
-    activeGroupCode: '',
-    currentIndex: 0,
-    groupTypes: [],
-    templates: [],
-    loading: false,
-    loadingMore: false,
-    refreshing: false,
-    page: 0,
-    pageSize: 10,
-    hasMore: true,
-    leftColumn: [],
-    rightColumn: [],
-    preloadComplete: false,
-    placeholderImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
-  },
-
-  // ÄÚ´æ±êÖ¾£º·ÀÖ¹Î»ÖÃÊÚÈ¨ÖØ¸´ÇëÇó£¨±ÈStorage¸ü¿ì£©
-  isRequestingLocation: false,
-  // »º´æÎ»ÖÃÊÚÈ¨×´Ì¬£ºtrue/false/undefined
-  locationAuthStatus: undefined,
-  // ÊÇ·ñÒÑµã»÷½øÈëÏêÇéÒ³£¨±ÜÃâ¼ÌĞøÕ¼ÓÃ×ÊÔ´Ô¤¼ÓÔØ£©
-  isNavigatingToDetail: false,
-  // Í¼Æ¬ÀÁ¼ÓÔØ¹Û²ìÆ÷
-  imageObserver: null,
-  observedTemplateIds: new Set(),
-  visibleTemplateIds: new Set(),
-  supportsObserveAll: false,
-  hasObservedAll: false,
-  disableIntersectionObserver: false,
-
-  onLoad(options) {
-    // »ñÈ¡×´Ì¬À¸¸ß¶È£¨ÓÃÓÚ×Ô¶¨Òåµ¼º½À¸£©
-    const systemInfo = wx.getSystemInfoSync()
-    this.setData({
-      statusBarHeight: systemInfo.statusBarHeight || 20
-    })
-
-    // ´¦ÀíÍÆ¹ãÁ´½Ó
-    this.handlePromotion(options)
-
-    // ¼ÓÔØÈËÈºÀàĞÍ£¨Íê³Éºó»á×Ô¶¯¼ÓÔØÄ£°å£©
-    this.loadGroupTypes()
-
-    // Ô¤ÏÈ¶ÁÈ¡Î»ÖÃÊÚÈ¨×´Ì¬£¬¼õÉÙµã»÷ºóµÄµÈ´ı
-    this.syncLocationAuthStatus()
-  },
-
-  onShow() {
-    // Ò³ÃæÏÔÊ¾Ê±Ë¢ĞÂÊÚÈ¨×´Ì¬£¨ÓÃ»§¿ÉÄÜ´ÓÉèÖÃ·µ»Ø£©
-    this.syncLocationAuthStatus()
-  },
-
-  onUnload() {
-    this.resetImageObserver()
-  },
-
-  onPullDownRefresh() {
-    this.onRefresh()
-  },
-
-  getStoredTemplateVersion() {
-    const value = Number(wx.getStorageSync(TEMPLATE_VERSION_KEY) || 0)
-    return Number.isFinite(value) ? value : 0
-  },
-
-  async checkTemplateVersion() {
-    try {
-      const result = await templateApi.getVersion()
-      const remoteVersion = result && result.version ? Number(result.version) : NaN
-      if (!Number.isFinite(remoteVersion) || remoteVersion < 1) return false
-      const localVersion = this.getStoredTemplateVersion()
-      if (remoteVersion !== localVersion) {
-        wx.setStorageSync(TEMPLATE_VERSION_KEY, remoteVersion)
-        this.clearTemplateCache()
-        return true
-      }
-    } catch (error) {
-      console.log('[Version] load failed:', error)
-    }
-    return false
-  },
-
-  clearTemplateCache() {
-    try {
-      const info = wx.getStorageInfoSync()
-      info.keys
-        .filter((key) => key.indexOf(TEMPLATE_CACHE_PREFIX) === 0)
-        .forEach((key) => wx.removeStorageSync(key))
-    } catch (error) {
-      console.log('[Cache] clear failed:', error)
-    }
-  },
-
-  getTemplateCacheKey(groupCode) {
-    return `${TEMPLATE_CACHE_PREFIX}${groupCode || 'all'}`
-  },
-
-  getCachedTemplates(groupCode) {
-    try {
-      const key = this.getTemplateCacheKey(groupCode)
-      const cached = wx.getStorageSync(key)
-      if (!cached) return null
-      const parsed = JSON.parse(cached)
-      if (!parsed || !Array.isArray(parsed.templates)) return null
-      return parsed
-    } catch (error) {
-      console.log('[Cache] read failed:', error)
-      return null
-    }
-  },
-
-  saveTemplateCache(groupCode, payload) {
-    try {
-      const key = this.getTemplateCacheKey(groupCode)
-      const data = {
-        version: this.getStoredTemplateVersion(),
-        templates: payload.templates || [],
-        page: payload.page || 1,
-        hasMore: payload.hasMore !== false,
-        savedAt: Date.now()
-      }
-      wx.setStorageSync(key, JSON.stringify(data))
-    } catch (error) {
-      console.log('[Cache] save failed:', error)
-    }
-  },
-
-  filterActiveTemplates(list) {
-    return list.filter((item) => item && item.status !== 'inactive' && item.is_active !== false && item.isActive !== false)
-  },
-
-
-  // Í¬²½»º´æÎ»ÖÃÊÚÈ¨×´Ì¬
-  syncLocationAuthStatus() {
-    wx.getSetting({
-      success: (res) => {
-        this.locationAuthStatus = res.authSetting['scope.userLocation']
-        console.log('[Location] »º´æÊÚÈ¨×´Ì¬:', this.locationAuthStatus)
-      },
-      fail: (err) => {
-        console.log('[Location] »ñÈ¡ÊÚÈ¨×´Ì¬Ê§°Ü:', err)
-        this.locationAuthStatus = undefined
-      }
-    })
-  },
-
-  // ´¦ÀíÍÆ¹ãÁ´½Ó
-  async handlePromotion(options) {
-    const { channel, sales, city, spot } = options
-
-    if (channel && sales) {
-      try {
-        const userOpenId = wx.getStorageSync('userOpenId') || `mp_${Date.now()}`
-        wx.setStorageSync('userOpenId', userOpenId)
-
-        await promotionApi.bindUser({
-          userOpenId,
-          channelCode: channel,
-          salesCode: sales,
-          city,
-          scenicSpot: spot
-        })
-
-        console.log('ÍÆ¹ã°ó¶¨³É¹¦')
-      } catch (error) {
-        console.error('ÍÆ¹ã°ó¶¨Ê§°Ü:', error)
-      }
-    }
-  },
-
-  // ¼ÓÔØÈËÈºÀàĞÍ
-  async loadGroupTypes() {
-    try {
-      const data = await templateApi.getGroupTypes('single')
-
-      // È·±£ data ÊÇÓĞĞ§Êı×é
-      const groupTypes = Array.isArray(data) ? data : []
-
-      this.setData({
-        groupTypes: groupTypes
-      })
-
-      // ÉèÖÃÄ¬ÈÏÑ¡ÖĞµÚÒ»¸öÈËÈºÀàĞÍ£¬²¢¼ÓÔØ¶ÔÓ¦Ä£°å
-      if (groupTypes.length > 0 && !this.data.activeGroupCode) {
-        this.setData({
-          activeGroupCode: groupTypes[0].code,
-          currentIndex: 0
-        })
-        const versionChanged = await this.checkTemplateVersion()
-        this.loadTemplates({ reset: true, forceRefresh: versionChanged })
-      } else if (groupTypes.length === 0) {
-        console.warn('[Index] ÈËÈºÀàĞÍÁĞ±íÎª¿Õ£¬Çë¼ì²éºó¶Ë·şÎñÊÇ·ñÔËĞĞ')
-      }
-    } catch (error) {
-      console.error('[Index] ¼ÓÔØÈËÈºÀàĞÍÊ§°Ü:', error)
-      // ÉèÖÃ¿ÕÊı×é±ÜÃâäÖÈ¾´íÎó
-      this.setData({
-        groupTypes: []
-      })
-    }
-  },
-
-  resetListState() {
-    this.resetImageObserver()
-    this.setData({
-      templates: [],
-      leftColumn: [],
-      rightColumn: [],
-      page: 0,
-      hasMore: true
-    })
-  },
-
-  normalizeTemplates(list) {
-    const apiBaseUrl = getApp().globalData.apiBaseUrl
-    return list.map((tpl) => {
-      const item = { ...tpl }
-      if (item.imageUrl && item.imageUrl.startsWith('/')) {
-        item.imageUrl = apiBaseUrl + item.imageUrl
-      }
-      if (item.thumbnailUrl && item.thumbnailUrl.startsWith('/')) {
-        item.thumbnailUrl = apiBaseUrl + item.thumbnailUrl
-      }
-      if (item.imageWebpUrl && item.imageWebpUrl.startsWith('/')) {
-        item.imageWebpUrl = apiBaseUrl + item.imageWebpUrl
-      }
-      if (item.thumbnailWebpUrl && item.thumbnailWebpUrl.startsWith('/')) {
-        item.thumbnailWebpUrl = apiBaseUrl + item.thumbnailWebpUrl
-      }
-      if (!item.thumbnailUrl && item.imageUrl) {
-        item.thumbnailUrl = item.imageUrl
-      }
-      if (!item.thumbnailWebpUrl && item.imageWebpUrl) {
-        item.thumbnailWebpUrl = item.imageWebpUrl
-      }
-      return item
-    })
-  },
-
-  buildColumns(templates) {
-    const leftColumn = []
-    const rightColumn = []
-
-    templates.forEach((tpl, index) => {
-      const idKey = String(tpl.id)
-      tpl.__visible = this.visibleTemplateIds.has(idKey)
-      if (index % 2 === 0) {
-        leftColumn.push(tpl)
-      } else {
-        rightColumn.push(tpl)
-      }
-    })
-
-    return { leftColumn, rightColumn }
-  },
-
-  initImageObserver() {
-    if (this.imageObserver) return
-
-    this.imageObserver = wx.createIntersectionObserver(this)
-    this.supportsObserveAll = typeof this.imageObserver.observeAll === 'function'
-    this.hasObservedAll = false
-    const scrollSelector = `#templates-scroll-${this.data.activeGroupCode}`
-
-    try {
-      this.imageObserver.relativeTo(scrollSelector, { bottom: 120 })
-    } catch (error) {
-      this.imageObserver.relativeToViewport({ bottom: 120 })
-    }
-  },
-
-  observeTemplateItems() {
-    if (!this.imageObserver) return
-
-    if (this.disableIntersectionObserver) {
-      this.markAllVisible()
-      return
-    }
-
-    if (this.supportsObserveAll) {
-      if (this.hasObservedAll) return
-      this.hasObservedAll = true
-      try {
-        this.imageObserver.observeAll('.observe-item', (res) => {
-          this.handleIntersectionEntries(res)
-        })
-      } catch (error) {
-        console.log('[Observer] observeAll failed:', error)
-        this.disableIntersectionObserver = true
-        this.markAllVisible()
-      }
-      return
-    }
-
-    this.disableIntersectionObserver = true
-    this.markAllVisible()
-  },
-
-  handleIntersectionEntries(res) {
-    if (Array.isArray(res)) {
-      res.forEach((entry) => this.handleTemplateIntersection(entry))
-      return
-    }
-    this.handleTemplateIntersection(res)
-  },
-
-  markAllVisible() {
-    const markVisible = (list) => list.map((tpl) => {
-      if (!tpl || tpl.id === undefined || tpl.id === null) return tpl
-      const idKey = String(tpl.id)
-      this.visibleTemplateIds.add(idKey)
-      return { ...tpl, __visible: true }
-    })
-
-    const leftColumn = markVisible(this.data.leftColumn)
-    const rightColumn = markVisible(this.data.rightColumn)
-    this.setData({ leftColumn, rightColumn })
-  },
-
-  handleTemplateIntersection(res) {
-    if (!res || res.intersectionRatio <= 0) return
-    const dataset = res.dataset || {}
-    const column = dataset.column
-    const index = Number(dataset.index)
-    const idKey = dataset.id !== undefined ? String(dataset.id) : ''
-
-    if (!column || Number.isNaN(index) || !idKey) return
-    if (this.visibleTemplateIds.has(idKey)) return
-
-    this.visibleTemplateIds.add(idKey)
-
-    const listName = column === 'left' ? 'leftColumn' : 'rightColumn'
-    const path = `${listName}[${index}].__visible`
-    this.setData({ [path]: true })
-  },
-
-  resetImageObserver() {
-    if (this.imageObserver) {
-      this.imageObserver.disconnect()
-      this.imageObserver = null
-    }
-    this.observedTemplateIds = new Set()
-    this.visibleTemplateIds = new Set()
-    this.supportsObserveAll = false
-    this.hasObservedAll = false
-    this.disableIntersectionObserver = false
-  },
-
-  // ¼ÓÔØÄ£°åÁĞ±í
-  async loadTemplates(options = {}) {
-    if (!this.data.activeGroupCode) return
-
-    const reset = options.reset === true
-    const forceRefresh = options.forceRefresh === true
-    if (reset) {
-      this.resetListState()
-    } else if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
-      return
-    }
-
-    const targetPage = reset ? 1 : this.data.page + 1
-
-    if (reset) {
-      this.setData({ loading: true, loadingMore: false })
-    } else {
-      this.setData({ loadingMore: true })
-    }
-
-    if (reset && !forceRefresh) {
-      const cached = this.getCachedTemplates(this.data.activeGroupCode)
-      if (cached && Array.isArray(cached.templates) && cached.templates.length > 0) {
-        const cleaned = this.filterActiveTemplates(cached.templates)
-        const normalizedCache = this.normalizeTemplates(cleaned)
-        const cachedPage = Number(cached.page) || 1
-        const cachedHasMore = cached.hasMore !== false
-        const { leftColumn, rightColumn } = this.buildColumns(normalizedCache)
-
-        this.setData({
-          templates: normalizedCache,
-          leftColumn,
-          rightColumn,
-          page: cachedPage,
-          hasMore: cachedHasMore
-        }, () => {
-          this.initImageObserver()
-          this.observeTemplateItems()
-        })
-
-        const cachedVersion = Number(cached.version) || 0
-        const localVersion = this.getStoredTemplateVersion()
-        if (cachedVersion && cachedVersion === localVersion) {
-          this.setData({ loading: false, loadingMore: false })
-          return
-        }
-      }
-    }
-
-
-    try {
-      const data = await templateApi.getList({
-        groupType: this.data.activeGroupCode,
-        page: targetPage,
-        pageSize: this.data.pageSize
-      })
-
-      // È·±£ data ÊÇÓĞĞ§Êı×é
-      const list = Array.isArray(data) ? data : []
-      const cleaned = this.filterActiveTemplates(list)
-      const normalized = this.normalizeTemplates(cleaned)
-      const templates = reset ? normalized : this.data.templates.concat(normalized)
-      const { leftColumn, rightColumn } = this.buildColumns(templates)
-      const hasMore = normalized.length >= this.data.pageSize
-
-      this.setData({
-        templates,
-        leftColumn,
-        rightColumn,
-        page: targetPage,
-        hasMore: hasMore
-      }, () => {
-        this.saveTemplateCache(this.data.activeGroupCode, {
-          templates,
-          page: targetPage,
-          hasMore
-        })
-        this.initImageObserver()
-        this.observeTemplateItems()
-      })
-    } catch (error) {
-      console.error('[Index] ¼ÓÔØÄ£°åÁĞ±íÊ§°Ü:', error)
-      if (reset) {
-        this.setData({
-          templates: [],
-          leftColumn: [],
-          rightColumn: [],
-          hasMore: false
-        })
-      }
-      wx.showToast({
-        title: '¼ÓÔØÊ§°Ü£¬Çë¼ì²éÍøÂç',
-        icon: 'none'
-      })
-    } finally {
-      this.setData({ loading: false, loadingMore: false })
-    }
-  },
-
-  loadMore() {
-    this.loadTemplates({ reset: false })
-  },
-
-  // µã»÷ÇĞ»»ÈËÈºÀàĞÍ
-  switchGroupType(e) {
-    const code = e.currentTarget.dataset.code
-    const index = parseInt(e.currentTarget.dataset.index)
-    if (this.data.activeGroupCode === code) return
-
-    this.setData({
-      activeGroupCode: code,
-      currentIndex: index
-    })
-    this.loadTemplates({ reset: true })
-  },
-
-  // swiper »¬¶¯ÇĞ»»
-  onSwiperChange(e) {
-    const index = e.detail.current
-    const groupTypes = this.data.groupTypes
-
-    if (index >= 0 && index < groupTypes.length) {
-      const code = groupTypes[index].code
-      if (this.data.activeGroupCode !== code) {
-        this.setData({
-          activeGroupCode: code,
-          currentIndex: index
-        })
-        this.loadTemplates({ reset: true })
-      }
-    }
-  },
-
-  // ´Óµ±Ç°ÁĞ±íÖĞÕÒµ½Ä£°å
-  findTemplateById(templateId) {
-    const templates = Array.isArray(this.data.templates) ? this.data.templates : []
-    return templates.find(t => Number(t.id) === Number(templateId)) || null
-  },
-
-  // Ìø×ªµ½ÏêÇéÒ³
-  goToDetail(e) {
-    const id = Number(e.currentTarget.dataset.id)
-    if (!id || Number.isNaN(id)) {
-      wx.showToast({
-        title: 'Ä£°å²ÎÊıÈ±Ê§',
-        icon: 'none'
-      })
-      return
-    }
-
-    this.isNavigatingToDetail = true
-
-    const selectedTemplate = this.findTemplateById(id)
-    if (selectedTemplate) {
-      wx.setStorageSync('lastSelectedTemplate', JSON.stringify(selectedTemplate))
-    }
-
-    const navigate = () => {
-      wx.navigateTo({
-        url: `/pages/template-detail/template-detail?id=${id}`,
-        success: (res) => {
-          if (selectedTemplate && res && res.eventChannel) {
-            res.eventChannel.emit('template', selectedTemplate)
-          }
-        }
-      })
-    }
-
-    // Èç¹ûÊÇÊ×´ÎÊÚÈ¨£¬ÏÈµ¯³öÊÚÈ¨£¬ÔÙ½øÈëÏêÇé
-    if (this.locationAuthStatus === undefined) {
-      if (this.isRequestingLocation) {
-        navigate()
-        return
-      }
-
-      this.isRequestingLocation = true
-      console.log('[Location] Á¢¼´ÇëÇóÎ»ÖÃÊÚÈ¨...')
-
-      wx.authorize({
-        scope: 'scope.userLocation',
-        success: () => {
-          console.log('[Location] ÓÃ»§Í¬ÒâÊÚÈ¨£¬¿ªÊ¼»ñÈ¡Î»ÖÃ')
-          this.locationAuthStatus = true
-          this.saveUserLocation()
-        },
-        fail: (err) => {
-          console.log('[Location] ÓÃ»§¾Ü¾øÎ»ÖÃÊÚÈ¨', err)
-          this.locationAuthStatus = false
-        },
-        complete: () => {
-          this.isRequestingLocation = false
-          navigate()
-        }
-      })
-      return
-    }
-
-    if (this.locationAuthStatus === true) {
-      this.saveUserLocation()
-    } else if (this.locationAuthStatus === false) {
-      // ²»×èÈûÌø×ª£¬¸øÌáÊ¾¼´¿É
-      this.promptOpenLocationSetting()
-    }
-
-    navigate()
-  },
-
-  // Òıµ¼ÓÃ»§È¥ÉèÖÃ¿ªÆô¶¨Î»È¨ÏŞ
-  promptOpenLocationSetting() {
-    wx.showModal({
-      title: 'ĞèÒªÎ»ÖÃĞÅÏ¢',
-      content: 'ÓÃÓÚÍÆ¼ö¸½½ü¾°µã£¬ÇëÔÚÉèÖÃÖĞ¿ªÆô¶¨Î»È¨ÏŞ¡£',
-      confirmText: 'È¥ÉèÖÃ',
-      success: (res) => {
-        if (!res.confirm) return
-
-        wx.openSetting({
-          success: (settingRes) => {
-            const status = settingRes.authSetting['scope.userLocation']
-            this.locationAuthStatus = status
-            if (status) {
-              console.log('[Location] ÉèÖÃÒ³ÒÑ¿ªÆôÊÚÈ¨£¬¿ªÊ¼»ñÈ¡Î»ÖÃ')
-              this.saveUserLocation()
-            }
-          }
-        })
-      }
-    })
-  },
-
-  // ±£´æÓÃ»§Î»ÖÃ
-  async saveUserLocation() {
-    try {
-      const location = await new Promise((resolve, reject) => {
-        wx.getLocation({
-          type: 'wgs84',
-          success: resolve,
-          fail: reject
-        })
-      })
-
-      // ±£´æÎ»ÖÃĞÅÏ¢
-      wx.setStorageSync('userLocation', {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        timestamp: Date.now()
-      })
-
-      console.log('Î»ÖÃ±£´æ³É¹¦:', location)
-    } catch (error) {
-      console.error('»ñÈ¡Î»ÖÃÊ§°Ü:', error)
-    }
-  },
-
-  // ÏÂÀ­Ë¢ĞÂ
-  async onRefresh() {
-    this.setData({ refreshing: true })
-    await this.loadTemplates({ reset: true, forceRefresh: true })
-    this.setData({ refreshing: false })
-    wx.stopPullDownRefresh()
-  },
-
-  // Ìø×ªµ½ÎÒµÄÕÕÆ¬Ò³Ãæ
-  goToMyPhotos() {
-    wx.navigateTo({
-      url: '/pages/my-photos/my-photos'
-    })
-  }
-})
+// pages/index/index.js
+const { templateApi, promotionApi } = require('../../utils/api.js')
+
+const TEMPLATE_VERSION_KEY = 'templateVersion'
+const TEMPLATE_CACHE_PREFIX = 'templateCache:p1:'
+
+
+Page({
+  data: {
+    statusBarHeight: 20,
+    activeGroupCode: '',
+    currentIndex: 0,
+    groupTypes: [],
+    templates: [],
+    loading: false,
+    loadingMore: false,
+    refreshing: false,
+    page: 0,
+    pageSize: 10,
+    hasMore: true,
+    leftColumn: [],
+    rightColumn: [],
+    preloadComplete: false,
+    placeholderImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+  },
+
+  // å†…å­˜æ ‡å¿—ï¼šé˜²æ­¢ä½ç½®æˆæƒé‡å¤è¯·æ±‚ï¼ˆæ¯”Storageæ›´å¿«ï¼‰
+  isRequestingLocation: false,
+  // ç¼“å­˜ä½ç½®æˆæƒçŠ¶æ€ï¼štrue/false/undefined
+  locationAuthStatus: undefined,
+  // æ˜¯å¦å·²ç‚¹å‡»è¿›å…¥è¯¦æƒ…é¡µï¼ˆé¿å…ç»§ç»­å ç”¨èµ„æºé¢„åŠ è½½ï¼‰
+  isNavigatingToDetail: false,
+  // å›¾ç‰‡æ‡’åŠ è½½è§‚å¯Ÿå™¨
+  imageObserver: null,
+  observedTemplateIds: new Set(),
+  visibleTemplateIds: new Set(),
+  supportsObserveAll: false,
+  hasObservedAll: false,
+  disableIntersectionObserver: false,
+
+  onLoad(options) {
+    // è·å–çŠ¶æ€æ é«˜åº¦ï¼ˆç”¨äºè‡ªå®šä¹‰å¯¼èˆªæ ï¼‰
+    const systemInfo = wx.getSystemInfoSync()
+    this.setData({
+      statusBarHeight: systemInfo.statusBarHeight || 20
+    })
+
+    // å¤„ç†æ¨å¹¿é“¾æ¥
+    this.handlePromotion(options)
+
+    // åŠ è½½äººç¾¤ç±»å‹ï¼ˆå®Œæˆåä¼šè‡ªåŠ¨åŠ è½½æ¨¡æ¿ï¼‰
+    this.loadGroupTypes()
+
+    // é¢„å…ˆè¯»å–ä½ç½®æˆæƒçŠ¶æ€ï¼Œå‡å°‘ç‚¹å‡»åçš„ç­‰å¾…
+    this.syncLocationAuthStatus()
+  },
+
+  onShow() {
+    // é¡µé¢æ˜¾ç¤ºæ—¶åˆ·æ–°æˆæƒçŠ¶æ€ï¼ˆç”¨æˆ·å¯èƒ½ä»è®¾ç½®è¿”å›ï¼‰
+    this.syncLocationAuthStatus()
+  },
+
+  onUnload() {
+    this.resetImageObserver()
+  },
+
+  onPullDownRefresh() {
+    this.onRefresh()
+  },
+
+  getStoredTemplateVersion() {
+    const value = Number(wx.getStorageSync(TEMPLATE_VERSION_KEY) || 0)
+    return Number.isFinite(value) ? value : 0
+  },
+
+  async checkTemplateVersion() {
+    try {
+      const result = await templateApi.getVersion()
+      const remoteVersion = result && result.version ? Number(result.version) : NaN
+      if (!Number.isFinite(remoteVersion) || remoteVersion < 1) return false
+      const localVersion = this.getStoredTemplateVersion()
+      if (remoteVersion !== localVersion) {
+        wx.setStorageSync(TEMPLATE_VERSION_KEY, remoteVersion)
+        this.clearTemplateCache()
+        return true
+      }
+    } catch (error) {
+      console.log('[Version] load failed:', error)
+    }
+    return false
+  },
+
+  clearTemplateCache() {
+    try {
+      const info = wx.getStorageInfoSync()
+      info.keys
+        .filter((key) => key.indexOf(TEMPLATE_CACHE_PREFIX) === 0)
+        .forEach((key) => wx.removeStorageSync(key))
+    } catch (error) {
+      console.log('[Cache] clear failed:', error)
+    }
+  },
+
+  getTemplateCacheKey(groupCode) {
+    return `${TEMPLATE_CACHE_PREFIX}${groupCode || 'all'}`
+  },
+
+  getCachedTemplates(groupCode) {
+    try {
+      const key = this.getTemplateCacheKey(groupCode)
+      const cached = wx.getStorageSync(key)
+      if (!cached) return null
+      const parsed = JSON.parse(cached)
+      if (!parsed || !Array.isArray(parsed.templates)) return null
+      return parsed
+    } catch (error) {
+      console.log('[Cache] read failed:', error)
+      return null
+    }
+  },
+
+  saveTemplateCache(groupCode, payload) {
+    try {
+      const key = this.getTemplateCacheKey(groupCode)
+      const data = {
+        version: this.getStoredTemplateVersion(),
+        templates: payload.templates || [],
+        page: payload.page || 1,
+        hasMore: payload.hasMore !== false,
+        savedAt: Date.now()
+      }
+      wx.setStorageSync(key, JSON.stringify(data))
+    } catch (error) {
+      console.log('[Cache] save failed:', error)
+    }
+  },
+
+  filterActiveTemplates(list) {
+    return list.filter((item) => item && item.status !== 'inactive' && item.is_active !== false && item.isActive !== false)
+  },
+
+
+  // åŒæ­¥ç¼“å­˜ä½ç½®æˆæƒçŠ¶æ€
+  syncLocationAuthStatus() {
+    wx.getSetting({
+      success: (res) => {
+        this.locationAuthStatus = res.authSetting['scope.userLocation']
+        console.log('[Location] ç¼“å­˜æˆæƒçŠ¶æ€:', this.locationAuthStatus)
+      },
+      fail: (err) => {
+        console.log('[Location] è·å–æˆæƒçŠ¶æ€å¤±è´¥:', err)
+        this.locationAuthStatus = undefined
+      }
+    })
+  },
+
+  // å¤„ç†æ¨å¹¿é“¾æ¥
+  async handlePromotion(options) {
+    const { channel, sales, city, spot } = options
+
+    if (channel && sales) {
+      try {
+        const userOpenId = wx.getStorageSync('userOpenId') || `mp_${Date.now()}`
+        wx.setStorageSync('userOpenId', userOpenId)
+
+        await promotionApi.bindUser({
+          userOpenId,
+          channelCode: channel,
+          salesCode: sales,
+          city,
+          scenicSpot: spot
+        })
+
+        console.log('æ¨å¹¿ç»‘å®šæˆåŠŸ')
+      } catch (error) {
+        console.error('æ¨å¹¿ç»‘å®šå¤±è´¥:', error)
+      }
+    }
+  },
+
+  // åŠ è½½äººç¾¤ç±»å‹
+  async loadGroupTypes() {
+    try {
+      const data = await templateApi.getGroupTypes('single')
+
+      // ç¡®ä¿ data æ˜¯æœ‰æ•ˆæ•°ç»„
+      const groupTypes = Array.isArray(data) ? data : []
+
+      this.setData({
+        groupTypes: groupTypes
+      })
+
+      // è®¾ç½®é»˜è®¤é€‰ä¸­ç¬¬ä¸€ä¸ªäººç¾¤ç±»å‹ï¼Œå¹¶åŠ è½½å¯¹åº”æ¨¡æ¿
+      if (groupTypes.length > 0 && !this.data.activeGroupCode) {
+        this.setData({
+          activeGroupCode: groupTypes[0].code,
+          currentIndex: 0
+        })
+        const versionChanged = await this.checkTemplateVersion()
+        this.loadTemplates({ reset: true, forceRefresh: versionChanged })
+      } else if (groupTypes.length === 0) {
+        console.warn('[Index] äººç¾¤ç±»å‹åˆ—è¡¨ä¸ºç©ºï¼Œè¯·æ£€æŸ¥åç«¯æœåŠ¡æ˜¯å¦è¿è¡Œ')
+      }
+    } catch (error) {
+      console.error('[Index] åŠ è½½äººç¾¤ç±»å‹å¤±è´¥:', error)
+      // è®¾ç½®ç©ºæ•°ç»„é¿å…æ¸²æŸ“é”™è¯¯
+      this.setData({
+        groupTypes: []
+      })
+    }
+  },
+
+  resetListState() {
+    this.resetImageObserver()
+    this.setData({
+      templates: [],
+      leftColumn: [],
+      rightColumn: [],
+      page: 0,
+      hasMore: true
+    })
+  },
+
+  normalizeTemplates(list) {
+    const apiBaseUrl = getApp().globalData.apiBaseUrl
+    return list.map((tpl) => {
+      const item = { ...tpl }
+      if (item.imageUrl && item.imageUrl.startsWith('/')) {
+        item.imageUrl = apiBaseUrl + item.imageUrl
+      }
+      if (item.thumbnailUrl && item.thumbnailUrl.startsWith('/')) {
+        item.thumbnailUrl = apiBaseUrl + item.thumbnailUrl
+      }
+      if (item.imageWebpUrl && item.imageWebpUrl.startsWith('/')) {
+        item.imageWebpUrl = apiBaseUrl + item.imageWebpUrl
+      }
+      if (item.thumbnailWebpUrl && item.thumbnailWebpUrl.startsWith('/')) {
+        item.thumbnailWebpUrl = apiBaseUrl + item.thumbnailWebpUrl
+      }
+      if (!item.thumbnailUrl && item.imageUrl) {
+        item.thumbnailUrl = item.imageUrl
+      }
+      if (!item.thumbnailWebpUrl && item.imageWebpUrl) {
+        item.thumbnailWebpUrl = item.imageWebpUrl
+      }
+      return item
+    })
+  },
+
+  buildColumns(templates) {
+    const leftColumn = []
+    const rightColumn = []
+
+    templates.forEach((tpl, index) => {
+      const idKey = String(tpl.id)
+      tpl.__visible = this.visibleTemplateIds.has(idKey)
+      if (index % 2 === 0) {
+        leftColumn.push(tpl)
+      } else {
+        rightColumn.push(tpl)
+      }
+    })
+
+    return { leftColumn, rightColumn }
+  },
+
+  initImageObserver() {
+    if (this.imageObserver) return
+
+    this.imageObserver = wx.createIntersectionObserver(this)
+    this.supportsObserveAll = typeof this.imageObserver.observeAll === 'function'
+    this.hasObservedAll = false
+    const scrollSelector = `#templates-scroll-${this.data.activeGroupCode}`
+
+    try {
+      this.imageObserver.relativeTo(scrollSelector, { bottom: 120 })
+    } catch (error) {
+      this.imageObserver.relativeToViewport({ bottom: 120 })
+    }
+  },
+
+  observeTemplateItems() {
+    if (!this.imageObserver) return
+
+    if (this.disableIntersectionObserver) {
+      this.markAllVisible()
+      return
+    }
+
+    if (this.supportsObserveAll) {
+      if (this.hasObservedAll) return
+      this.hasObservedAll = true
+      try {
+        this.imageObserver.observeAll('.observe-item', (res) => {
+          this.handleIntersectionEntries(res)
+        })
+      } catch (error) {
+        console.log('[Observer] observeAll failed:', error)
+        this.disableIntersectionObserver = true
+        this.markAllVisible()
+      }
+      return
+    }
+
+    this.disableIntersectionObserver = true
+    this.markAllVisible()
+  },
+
+  handleIntersectionEntries(res) {
+    if (Array.isArray(res)) {
+      res.forEach((entry) => this.handleTemplateIntersection(entry))
+      return
+    }
+    this.handleTemplateIntersection(res)
+  },
+
+  markAllVisible() {
+    const markVisible = (list) => list.map((tpl) => {
+      if (!tpl || tpl.id === undefined || tpl.id === null) return tpl
+      const idKey = String(tpl.id)
+      this.visibleTemplateIds.add(idKey)
+      return { ...tpl, __visible: true }
+    })
+
+    const leftColumn = markVisible(this.data.leftColumn)
+    const rightColumn = markVisible(this.data.rightColumn)
+    this.setData({ leftColumn, rightColumn })
+  },
+
+  handleTemplateIntersection(res) {
+    if (!res || res.intersectionRatio <= 0) return
+    const dataset = res.dataset || {}
+    const column = dataset.column
+    const index = Number(dataset.index)
+    const idKey = dataset.id !== undefined ? String(dataset.id) : ''
+
+    if (!column || Number.isNaN(index) || !idKey) return
+    if (this.visibleTemplateIds.has(idKey)) return
+
+    this.visibleTemplateIds.add(idKey)
+
+    const listName = column === 'left' ? 'leftColumn' : 'rightColumn'
+    const path = `${listName}[${index}].__visible`
+    this.setData({ [path]: true })
+  },
+
+  resetImageObserver() {
+    if (this.imageObserver) {
+      this.imageObserver.disconnect()
+      this.imageObserver = null
+    }
+    this.observedTemplateIds = new Set()
+    this.visibleTemplateIds = new Set()
+    this.supportsObserveAll = false
+    this.hasObservedAll = false
+    this.disableIntersectionObserver = false
+  },
+
+  // åŠ è½½æ¨¡æ¿åˆ—è¡¨
+  async loadTemplates(options = {}) {
+    if (!this.data.activeGroupCode) return
+
+    const reset = options.reset === true
+    const forceRefresh = options.forceRefresh === true
+    if (reset) {
+      this.resetListState()
+    } else if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
+      return
+    }
+
+    const targetPage = reset ? 1 : this.data.page + 1
+
+    if (reset) {
+      this.setData({ loading: true, loadingMore: false })
+    } else {
+      this.setData({ loadingMore: true })
+    }
+
+    if (reset && !forceRefresh) {
+      const cached = this.getCachedTemplates(this.data.activeGroupCode)
+      if (cached && Array.isArray(cached.templates) && cached.templates.length > 0) {
+        const cleaned = this.filterActiveTemplates(cached.templates)
+        const normalizedCache = this.normalizeTemplates(cleaned)
+        const cachedPage = Number(cached.page) || 1
+        const cachedHasMore = cached.hasMore !== false
+        const { leftColumn, rightColumn } = this.buildColumns(normalizedCache)
+
+        this.setData({
+          templates: normalizedCache,
+          leftColumn,
+          rightColumn,
+          page: cachedPage,
+          hasMore: cachedHasMore
+        }, () => {
+          this.initImageObserver()
+          this.observeTemplateItems()
+        })
+
+        const cachedVersion = Number(cached.version) || 0
+        const localVersion = this.getStoredTemplateVersion()
+        if (cachedVersion && cachedVersion === localVersion) {
+          this.setData({ loading: false, loadingMore: false })
+          return
+        }
+      }
+    }
+
+
+    try {
+      const data = await templateApi.getList({
+        groupType: this.data.activeGroupCode,
+        page: targetPage,
+        pageSize: this.data.pageSize
+      })
+
+      // ç¡®ä¿ data æ˜¯æœ‰æ•ˆæ•°ç»„
+      const list = Array.isArray(data) ? data : []
+      const cleaned = this.filterActiveTemplates(list)
+      const normalized = this.normalizeTemplates(cleaned)
+      const templates = reset ? normalized : this.data.templates.concat(normalized)
+      const { leftColumn, rightColumn } = this.buildColumns(templates)
+      const hasMore = normalized.length >= this.data.pageSize
+
+      this.setData({
+        templates,
+        leftColumn,
+        rightColumn,
+        page: targetPage,
+        hasMore: hasMore
+      }, () => {
+        this.saveTemplateCache(this.data.activeGroupCode, {
+          templates,
+          page: targetPage,
+          hasMore
+        })
+        this.initImageObserver()
+        this.observeTemplateItems()
+      })
+    } catch (error) {
+      console.error('[Index] åŠ è½½æ¨¡æ¿åˆ—è¡¨å¤±è´¥:', error)
+      if (reset) {
+        this.setData({
+          templates: [],
+          leftColumn: [],
+          rightColumn: [],
+          hasMore: false
+        })
+      }
+      wx.showToast({
+        title: 'åŠ è½½å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œ',
+        icon: 'none'
+      })
+    } finally {
+      this.setData({ loading: false, loadingMore: false })
+    }
+  },
+
+  loadMore() {
+    this.loadTemplates({ reset: false })
+  },
+
+  // ç‚¹å‡»åˆ‡æ¢äººç¾¤ç±»å‹
+  switchGroupType(e) {
+    const code = e.currentTarget.dataset.code
+    const index = parseInt(e.currentTarget.dataset.index)
+    if (this.data.activeGroupCode === code) return
+
+    this.setData({
+      activeGroupCode: code,
+      currentIndex: index
+    })
+    this.loadTemplates({ reset: true })
+  },
+
+  // swiper æ»‘åŠ¨åˆ‡æ¢
+  onSwiperChange(e) {
+    const index = e.detail.current
+    const groupTypes = this.data.groupTypes
+
+    if (index >= 0 && index < groupTypes.length) {
+      const code = groupTypes[index].code
+      if (this.data.activeGroupCode !== code) {
+        this.setData({
+          activeGroupCode: code,
+          currentIndex: index
+        })
+        this.loadTemplates({ reset: true })
+      }
+    }
+  },
+
+  // ä»å½“å‰åˆ—è¡¨ä¸­æ‰¾åˆ°æ¨¡æ¿
+  findTemplateById(templateId) {
+    const templates = Array.isArray(this.data.templates) ? this.data.templates : []
+    return templates.find(t => Number(t.id) === Number(templateId)) || null
+  },
+
+  // è·³è½¬åˆ°è¯¦æƒ…é¡µ
+  goToDetail(e) {
+    const id = Number(e.currentTarget.dataset.id)
+    if (!id || Number.isNaN(id)) {
+      wx.showToast({
+        title: 'æ¨¡æ¿å‚æ•°ç¼ºå¤±',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.isNavigatingToDetail = true
+
+    const selectedTemplate = this.findTemplateById(id)
+    if (selectedTemplate) {
+      wx.setStorageSync('lastSelectedTemplate', JSON.stringify(selectedTemplate))
+    }
+
+    const navigate = () => {
+      wx.navigateTo({
+        url: `/pages/template-detail/template-detail?id=${id}`,
+        success: (res) => {
+          if (selectedTemplate && res && res.eventChannel) {
+            res.eventChannel.emit('template', selectedTemplate)
+          }
+        }
+      })
+    }
+
+    // å¦‚æœæ˜¯é¦–æ¬¡æˆæƒï¼Œå…ˆå¼¹å‡ºæˆæƒï¼Œå†è¿›å…¥è¯¦æƒ…
+    if (this.locationAuthStatus === undefined) {
+      if (this.isRequestingLocation) {
+        navigate()
+        return
+      }
+
+      this.isRequestingLocation = true
+      console.log('[Location] ç«‹å³è¯·æ±‚ä½ç½®æˆæƒ...')
+
+      wx.authorize({
+        scope: 'scope.userLocation',
+        success: () => {
+          console.log('[Location] ç”¨æˆ·åŒæ„æˆæƒï¼Œå¼€å§‹è·å–ä½ç½®')
+          this.locationAuthStatus = true
+          this.saveUserLocation()
+        },
+        fail: (err) => {
+          console.log('[Location] ç”¨æˆ·æ‹’ç»ä½ç½®æˆæƒ', err)
+          this.locationAuthStatus = false
+        },
+        complete: () => {
+          this.isRequestingLocation = false
+          navigate()
+        }
+      })
+      return
+    }
+
+    if (this.locationAuthStatus === true) {
+      this.saveUserLocation()
+    } else if (this.locationAuthStatus === false) {
+      // ä¸é˜»å¡è·³è½¬ï¼Œç»™æç¤ºå³å¯
+      this.promptOpenLocationSetting()
+    }
+
+    navigate()
+  },
+
+  // å¼•å¯¼ç”¨æˆ·å»è®¾ç½®å¼€å¯å®šä½æƒé™
+  promptOpenLocationSetting() {
+    wx.showModal({
+      title: 'éœ€è¦ä½ç½®ä¿¡æ¯',
+      content: 'ç”¨äºæ¨èé™„è¿‘æ™¯ç‚¹ï¼Œè¯·åœ¨è®¾ç½®ä¸­å¼€å¯å®šä½æƒé™ã€‚',
+      confirmText: 'å»è®¾ç½®',
+      success: (res) => {
+        if (!res.confirm) return
+
+        wx.openSetting({
+          success: (settingRes) => {
+            const status = settingRes.authSetting['scope.userLocation']
+            this.locationAuthStatus = status
+            if (status) {
+              console.log('[Location] è®¾ç½®é¡µå·²å¼€å¯æˆæƒï¼Œå¼€å§‹è·å–ä½ç½®')
+              this.saveUserLocation()
+            }
+          }
+        })
+      }
+    })
+  },
+
+  // ä¿å­˜ç”¨æˆ·ä½ç½®
+  async saveUserLocation() {
+    try {
+      const location = await new Promise((resolve, reject) => {
+        wx.getLocation({
+          type: 'wgs84',
+          success: resolve,
+          fail: reject
+        })
+      })
+
+      // ä¿å­˜ä½ç½®ä¿¡æ¯
+      wx.setStorageSync('userLocation', {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        timestamp: Date.now()
+      })
+
+      console.log('ä½ç½®ä¿å­˜æˆåŠŸ:', location)
+    } catch (error) {
+      console.error('è·å–ä½ç½®å¤±è´¥:', error)
+    }
+  },
+
+  // ä¸‹æ‹‰åˆ·æ–°
+  async onRefresh() {
+    this.setData({ refreshing: true })
+    await this.loadTemplates({ reset: true, forceRefresh: true })
+    this.setData({ refreshing: false })
+    wx.stopPullDownRefresh()
+  },
+
+  // è·³è½¬åˆ°æˆ‘çš„ç…§ç‰‡é¡µé¢
+  goToMyPhotos() {
+    wx.navigateTo({
+      url: '/pages/my-photos/my-photos'
+    })
+  }
+})

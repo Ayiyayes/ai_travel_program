@@ -203,7 +203,6 @@
   100% { background-position: -200% 0; }
 }
 
-/* 加载更多提示 */
 .load-more {
   display: flex;
   justify-content: center;
