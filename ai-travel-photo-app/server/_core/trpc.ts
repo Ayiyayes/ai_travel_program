@@ -31,6 +31,40 @@ export const adminProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
 
+    const devAdminBypass = process.env.DEV_ADMIN_BYPASS === "true";
+    if (process.env.NODE_ENV === "development" && devAdminBypass) {
+      const devAdminUser = ctx.user ?? {
+        id: 0,
+        openId: "local-super-admin",
+        name: "Dev Admin",
+        email: null,
+        avatar: null,
+        loginMethod: "dev",
+        role: "admin",
+        points: 0,
+        initialFreeCredits: 0,
+        hasUsedFreeCredits: false,
+        channelId: null,
+        salesId: null,
+        promotionCodeId: null,
+        gender: null,
+        userType: null,
+        faceType: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSignedIn: new Date(),
+        lastSelfieUrl: null,
+        lastSelfieTime: null,
+      };
+
+      return next({
+        ctx: {
+          ...ctx,
+          user: { ...devAdminUser, role: "admin" },
+        },
+      });
+    }
+
     if (!ctx.user || ctx.user.role !== 'admin') {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
     }
