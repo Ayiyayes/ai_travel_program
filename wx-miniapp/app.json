@@ -23,12 +23,6 @@
   "permission": {
     "scope.userLocation": {
       "desc": "用于获取您的位置信息，推荐附近景点"
-    },
-    "scope.camera": {
-      "desc": "用于拍摄自拍照片"
-    },
-    "scope.writePhotosAlbum": {
-      "desc": "用于保存生成的照片到相册"
     }
   },
   "requiredPrivateInfos": [

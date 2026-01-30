@@ -7,7 +7,7 @@
 ## 目录结构
 
 ```
-ai_travel_code_20260112/
+ai_travel_program/
   ai-travel-photo-app/   # 后端服务 + 管理后台
   wx-miniapp/            # 微信小程序前端
   ai_travel_前端功能梳理.md
@@ -36,7 +36,37 @@ ai_travel_code_20260112/
 
 ---
 
-## 快速启动（后端 + 管理后台）
+## 一键启动（推荐）
+
+首次运行会自动生成 `.env` 并提示输入 MySQL 连接信息（直接回车使用默认值即可）。如果本机已安装 `mysql` 客户端，脚本会尝试自动创建数据库。
+
+**macOS / Linux：**
+```
+bash start.sh
+```
+
+**Windows：**
+```
+start.bat
+```
+
+启动后：
+- 管理后台地址：`http://localhost:3000/admin`
+- API 基地址：`http://localhost:3000`
+
+开发环境超级管理员登录入口：
+```
+http://localhost:3000/api/dev/super-admin/login
+```
+
+如果浏览器阻止 HttpOnly Cookie 或无法登录，可在开发环境开启管理员绕过（仅本地调试）：
+```
+DEV_ADMIN_BYPASS=true
+```
+
+---
+
+## 手动启动（后端 + 管理后台）
 
 ### 1）进入后端目录
 
@@ -60,7 +90,7 @@ CREATE DATABASE ai_travel DEFAULT CHARSET utf8mb4;
 
 ### 4）配置环境变量
 
-在 `ai-travel-photo-app/.env` 填写以下关键配置（示例字段，**请替换为你的真实值**）：
+在 `ai-travel-photo-app/.env` 填写以下关键配置（示例字段，**请替换为你的真实值**）。也可以运行 `node scripts/init-env.mjs` 生成 `.env` 模板：
 
 ```
 PORT=3000
@@ -68,6 +98,7 @@ DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/ai_travel
 JWT_SECRET=your-secret
 TENCENT_MAP_API_KEY=your-key
 STORAGE_TYPE=local   # local 或 cloud
+DEV_ADMIN_BYPASS=false
 
 COS_SECRET_ID=...
 COS_SECRET_KEY=...
@@ -116,15 +147,58 @@ apiBaseUrl: 'http://localhost:3000'
 
 ---
 
+## 模板导入与显示（后台 → 小程序）
+
+### 1）导入模板图片
+进入后台 **模板配置**：
+1. 点击“导入文件夹”
+2. 等待上传完成（必须看到 X/X 成功）
+3. 点击“生成模板ID”
+4. 点击“保存模板库”
+
+> 注意：仅“导入”不会写入模板库，必须“保存模板库”才会进数据库。
+
+### 2）人群类型代码一致性
+后台导入会使用人群类型代码（如 `girl_young`）。  
+请确保数据库的 `groupTypes.code` 与导入的人群类型一致，否则小程序会显示为空。
+
+### 3）刷新模板缓存
+如果小程序还是旧图，可手动提升模板版本：
+```sql
+UPDATE systemConfigs
+SET configValue = CAST(configValue AS UNSIGNED) + 1
+WHERE configKey='template_version';
+```
+然后在微信开发者工具中“清除缓存并重启”。
+
+---
+
+## 生成能力依赖（拍照后生成失败时必读）
+
+生成链路依赖 Coze 与公网可访问图片：
+
+### 必需配置（Coze）
+```
+COZE_API_KEY=你的key
+COZE_BOT_ID=可选（如工作流需要）
+COZE_SINGLE_FACE_WORKFLOW_ID=...
+COZE_DOUBLE_FACE_WORKFLOW_ID=...
+COZE_USER_ANALYZE_WORKFLOW_ID=...
+```
+
+### 存储建议
+本地存储（`STORAGE_TYPE=local`）的图片无法被 Coze 访问。  
+要跑通真实生成，建议使用 COS（`STORAGE_TYPE=cloud`）。
+
+---
+
 ## 一键启动（GitHub 复现建议）
 
 开发者从 GitHub 拉取后，执行以下命令即可快速启动（后端 + 管理后台）：
 
 ```
-cd ai-travel-photo-app
-pnpm install
-pnpm run db:push
-pnpm run dev
+bash start.sh   # macOS / Linux
+start.bat    # Windows
 ```
 
 小程序部分需通过微信开发者工具打开 `wx-miniapp` 目录运行。
@@ -146,4 +220,3 @@ pnpm run dev
 - 若启用云存储（`STORAGE_TYPE=cloud`），请确保 COS 配置完整且可用  
 - AI 换脸依赖 Coze 额度与密钥配置  
 - P8 景点/人群类型乱码问题通常为编码不一致，请确保相关文件统一使用 UTF-8  
-

@@ -183,7 +183,7 @@ Page({
 
   },
 
-    this.initNavBar()
+  initNavBar() {
     try {
       const systemInfo = wx.getSystemInfoSync()
       const menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null
@@ -2137,7 +2137,6 @@ Page({
   }
 
 })
-
 
 
 
